@@ -92,3 +92,10 @@ CREATE TABLE IF NOT EXISTS codici_otp (
     scadenza DATETIME NOT NULL,              -- Calcolata come istante di generazione + 3 minuti
     FOREIGN KEY (studente_id) REFERENCES studenti(id) ON DELETE CASCADE
 );
+
+-- 8. Tabella licenze
+CREATE TABLE IF NOT EXISTS licenze (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    descrizione TEXT NOT NULL
+)
