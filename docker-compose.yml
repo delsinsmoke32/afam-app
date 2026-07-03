@@ -1,0 +1,15 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: afam_mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gestionale_afam
+    ports:
+      - "3307:3306"
+    volumes:
+      # Questa riga copia il tuo file sql dentro la cartella magica di MySQL
+      - ./db-init:/docker-entrypoint-initdb.d
+      # TRUCCO: Questo crea una cartella "mysql_data" nel tuo progetto 
+      # dove risiedono i dati, simulando il comportamento di SQLite!
+      - ./mysql_data:/var/lib/mysql
