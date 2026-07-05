@@ -26,7 +26,6 @@ public class StatisticaAccesso {
     private Long id;
 
     private LocalDateTime dataOraAccesso;
-    private String indirizzoIp;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "link_condiviso_id", nullable = false)

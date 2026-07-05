@@ -20,6 +20,13 @@ CREATE TABLE IF NOT EXISTS studenti (
     link_personale VARCHAR(255)              -- Es. Instagram, LinkedIn, ArtStation
 );
 
+-- 8. Tabella licenze
+CREATE TABLE IF NOT EXISTS licenze (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    descrizione TEXT NOT NULL
+)
+
 -- 2. Tabella Portfoli
 CREATE TABLE IF NOT EXISTS portfoli (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -28,7 +35,9 @@ CREATE TABLE IF NOT EXISTS portfoli (
     descrizione TEXT,
     download_abilitato BOOLEAN DEFAULT TRUE, -- Caso d'uso IMDL (Impostazioni Download)
     visite_totali INT DEFAULT 0,             -- Contatore globale visite
-    FOREIGN KEY (studente_id) REFERENCES studenti(id) ON DELETE CASCADE
+    ref_licenza INT,                         -- Riferimento alla licenza
+    FOREIGN KEY (studente_id) REFERENCES studenti(id) ON DELETE CASCADE,
+    FOREIGN KEY (ref_licenza) REFERENCES licenze(id) ON DELETE SET NULL
 );
 
 -- 3. Tabella Sezioni
@@ -74,7 +83,6 @@ CREATE TABLE IF NOT EXISTS statistiche_accessi (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     link_condiviso_id BIGINT NOT NULL,
     data_ora_accesso DATETIME DEFAULT CURRENT_TIMESTAMP,
-    indirizzo_ip VARCHAR(45),                -- Opzionale, tracking tecnico
     
     -- Nuovi campi aggiunti per soddisfare il Caso d'uso RSA
     nome_visitatore VARCHAR(100),            -- Nome (se fornito o se loggato)
@@ -93,9 +101,13 @@ CREATE TABLE IF NOT EXISTS codici_otp (
     FOREIGN KEY (studente_id) REFERENCES studenti(id) ON DELETE CASCADE
 );
 
--- 8. Tabella licenze
-CREATE TABLE IF NOT EXISTS licenze (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(255) NOT NULL,
-    descrizione TEXT NOT NULL
-)
+-- 9. Tabella di Override Visibilità per Link Condiviso
+CREATE TABLE IF NOT EXISTS visibilita_link_sezioni (
+    link_condiviso_id BIGINT NOT NULL,
+    sezione_id BIGINT NOT NULL,
+    is_visibile BOOLEAN NOT NULL DEFAULT TRUE, -- Stato personalizzato per questo link
+    
+    PRIMARY KEY (link_condiviso_id, sezione_id),
+    FOREIGN KEY (link_condiviso_id) REFERENCES link_condivisi(id) ON DELETE CASCADE,
+    FOREIGN KEY (sezione_id) REFERENCES sezioni(id) ON DELETE CASCADE
+);
