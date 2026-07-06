@@ -9,16 +9,12 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import org.springframework.stereotype.Component;
-
-import it.afam.is.progetto.afam_app.gestioneaccount.control.RegistrazioneControl;
+import it.afam.is.progetto.afam_app.gestioneaccount.control.RegistrazioneController;
 import it.afam.is.progetto.afam_app.gestioneaccount.dto.CredenzialiRegistrazione;
 
-@Component
 public class FormRegistrazioneBoundary extends JFrame {
 
-    private final RegistrazioneControl registrazioneControl;
-    private final PopupErroreBoundary popupErroreBoundary;
+    private final RegistrazioneController registrazioneController;
 
     private JTextField nomeField;
     private JTextField cognomeField;
@@ -26,13 +22,10 @@ public class FormRegistrazioneBoundary extends JFrame {
     private JPasswordField passwordField;
     private JTextField codiceFiscaleField;
     private JTextField corsoDiStudiField;
+    private CredenzialiRegistrazione credenziali;
 
-    public FormRegistrazioneBoundary(
-            RegistrazioneControl registrazioneControl,
-            PopupErroreBoundary popupErroreBoundary
-    ) {
-        this.registrazioneControl = registrazioneControl;
-        this.popupErroreBoundary = popupErroreBoundary;
+    public FormRegistrazioneBoundary(RegistrazioneController registrazioneController) {
+        this.registrazioneController = registrazioneController;
     }
 
     public void mostraFormReg() {
@@ -50,7 +43,7 @@ public class FormRegistrazioneBoundary extends JFrame {
         codiceFiscaleField = new JTextField();
         corsoDiStudiField = new JTextField();
 
-        JButton registratiButton = new JButton("Registrati");
+        JButton okButton = new JButton("OK");
 
         panel.add(new JLabel("Nome *"));
         panel.add(nomeField);
@@ -71,15 +64,19 @@ public class FormRegistrazioneBoundary extends JFrame {
         panel.add(corsoDiStudiField);
 
         panel.add(new JLabel(""));
-        panel.add(registratiButton);
+        panel.add(okButton);
 
-        registratiButton.addActionListener(e -> inserisciCredenziali());
+        okButton.addActionListener(e -> cliccaOK());
 
         setContentPane(panel);
         setVisible(true);
     }
 
-    private void inserisciCredenziali() {
+    public void inserisciCredenziali(CredenzialiRegistrazione credenziali) {
+        this.credenziali = credenziali;
+    }
+
+    public void cliccaOK() {
         CredenzialiRegistrazione credenziali = new CredenzialiRegistrazione(
                 nomeField.getText(),
                 cognomeField.getText(),
@@ -89,14 +86,8 @@ public class FormRegistrazioneBoundary extends JFrame {
                 corsoDiStudiField.getText()
         );
 
-        String errore = registrazioneControl.inserisciCredenziali(credenziali);
-
-        if (errore != null) {
-            popupErroreBoundary.mostraPopupErrore(errore);
-            return;
-        }
-
-        popupErroreBoundary.mostraPopupSuccesso("Registrazione completata con successo.");
+        inserisciCredenziali(credenziali);
+        registrazioneController.mandaCredenziali(this.credenziali);
         dispose();
     }
 }

@@ -13,7 +13,9 @@ import it.afam.is.progetto.afam_app.gestioneaccount.boundary.AutenticazioneBound
 public class AfamAppApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(AfamAppApplication.class, args);
+        SpringApplication app = new SpringApplication(AfamAppApplication.class);
+        app.setHeadless(false);
+        app.run(args);
     }
 
     @Bean

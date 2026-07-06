@@ -34,3 +34,21 @@ build/
 
 ### file del db particolari ###
 /mysql_data
+
+docker/mysql_data/
+target/
+*.log
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+
+docker/mysql_data/
+target/
+*.log
+.DS_Store
+.idea/
+.vscode/
+*.iml
+

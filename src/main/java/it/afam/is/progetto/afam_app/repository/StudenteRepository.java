@@ -20,4 +20,6 @@ public interface StudenteRepository extends JpaRepository<Studente, Long> {
     Optional<Studente> findByEmailAndPassword(String email, String password);
 
     Optional<Studente> findByEmail(String email);
+
+    Optional<Studente> findByCodiceFiscale(String codiceFiscale);
 }

@@ -1,11 +1,14 @@
 package it.afam.is.progetto.afam_app.boundary;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.afam.is.progetto.afam_app.entity.CodiceOTPEntity;
 import it.afam.is.progetto.afam_app.entity.CodiceOtp;
 import it.afam.is.progetto.afam_app.entity.Studente;
 import it.afam.is.progetto.afam_app.gestioneaccount.dto.CredenzialiRegistrazione;
@@ -21,75 +24,246 @@ public class DBMSBoundary {
     @Autowired
     private CodiceOtpRepository codiceOtpRepository;
 
-    // Messaggio 13.1 del Sequence Diagram: inserisciCredenziali
-    // nome/cognome non compaiono nel diagramma ma sono NOT NULL su Studente (vedi RegistrazioneController)
-    public void inserisciCredenziali(String nome, String cognome, String email, String password, String corsoDiStudi, String codiceFiscale) {
-
+    public void inserisciCredenziali(
+            String nome,
+            String cognome,
+            String email,
+            String password,
+            String corsoDiStudi,
+            String codiceFiscale
+    ) {
         Studente nuovoStudente = Studente.builder()
                 .nome(nome)
                 .cognome(cognome)
                 .email(email)
-                .password(password) // Per l'MVP va bene in chiaro
+                .password(password)
                 .corsoDiStudi(corsoDiStudi)
                 .codiceFiscale(codiceFiscale)
+                .provider_autenticazione("LOCAL")
                 .build();
 
         studenteRepository.save(nuovoStudente);
     }
-    
-    // Verifica per il blocco "isValid" (messaggio 12)
+
     public boolean esisteCodiceFiscale(String codiceFiscale) {
         return studenteRepository.existsByCodiceFiscale(codiceFiscale);
     }
 
-    // Non presente nel diagramma: email è UNIQUE su Studente quanto codiceFiscale, senza questo
-    // controllo un'email duplicata farebbe fallire l'insert con un 500 invece di un errore gestito.
     public boolean esisteEmail(String email) {
         return studenteRepository.existsByEmail(email);
     }
 
-    // Messaggio 6/6.1 del Sequence Diagram Login2FA: VerificaEsistenzaCredenziali / queryVerificaEsistenzaCredenziali
-    public Optional<Studente> verificaEsistenzaCredenziali(String email, String password) {
-        return studenteRepository.findByEmailAndPassword(email, password);
+    public Studente verificaEsistenzaCredenziali(String mail, String password) {
+        return queryVerificaEsistenzaCredenziali(mail, password);
     }
 
-    public Optional<Studente> trovaPerEmail(String email) {
-        return studenteRepository.findByEmail(email);
+    public Studente queryVerificaEsistenzaCredenziali(String mail, String password) {
+        Optional<Studente> studente = studenteRepository.findByEmailAndPassword(mail.trim(), password);
+        return studente.orElse(null);
     }
 
-    // Messaggio 9/9.1 del Sequence Diagram Login2FA: salvaOTP / insertSalvaOTP
-    public void salvaOTP(Long studenteId, String codice, LocalDateTime scadenza) {
-        // Non presente nel diagramma: elimina eventuali OTP precedenti dello stesso studente
-        // prima di salvarne uno nuovo, altrimenti codici_otp cresce senza mai ripulirsi.
-        codiceOtpRepository.deleteByStudenteId(studenteId);
+   public void salvaOTP(CodiceOTPEntity codiceOTP) {
+    // insertOTP(codiceOTP)
+    insertOTP(codiceOTP);
+}
 
-        CodiceOtp codiceOtp = CodiceOtp.builder()
-                .studente(studenteRepository.getReferenceById(studenteId))
-                .codice(codice)
-                .scadenza(scadenza)
+    public void insertSalvaOTP(CodiceOTPEntity codiceOTP) {
+        CodiceOtp nuovoCodiceOtp = CodiceOtp.builder()
+                .studente(codiceOTP.getStudente())
+                .codice(codiceOTP.getCodice())
+                .scadenza(codiceOTP.getScadenza())
                 .build();
 
-        codiceOtpRepository.save(codiceOtp);
+        codiceOtpRepository.save(nuovoCodiceOtp);
     }
 
-    // Supporto al messaggio 16.1.1 del Sequence Diagram Login2FA: ControllaOTP (self-call su LoginController)
-    public boolean trovaOtpValido(Long studenteId, String codice) {
-        return codiceOtpRepository
-                .findTopByStudenteIdAndCodiceAndScadenzaAfterOrderByIdDesc(studenteId, codice, LocalDateTime.now())
-                .isPresent();
+    public void insertInserisciStudente(Studente studente) {
+        studenteRepository.save(studente);
     }
 
     public void mandaCredenziali(CredenzialiRegistrazione credenziali) {
-    Studente nuovoStudente = Studente.builder()
-            .nome(credenziali.getNome().trim())
-            .cognome(credenziali.getCognome().trim())
-            .email(credenziali.getEmail().trim())
-            .password(credenziali.getPassword())
-            .codiceFiscale(credenziali.getCodiceFiscale().trim().toUpperCase())
-            .corsoDiStudi(credenziali.getCorsoDiStudi())
-            .provider_autenticazione("LOCAL")
+        Studente nuovoStudente = Studente.builder()
+                .nome(credenziali.getNome().trim())
+                .cognome(credenziali.getCognome().trim())
+                .email(credenziali.getEmail().trim())
+                .password(credenziali.getPassword())
+                .codiceFiscale(credenziali.getCodiceFiscale().trim().toUpperCase())
+                .corsoDiStudi(credenziali.getCorsoDiStudi())
+                .provider_autenticazione("LOCAL")
+                .build();
+
+        studenteRepository.save(nuovoStudente);
+    }
+
+    public Studente trovaPerEmail(String email) {
+        return studenteRepository.findByEmail(email).orElse(null);
+    }
+
+    public boolean trovaOtpValido(Long studenteId, String codice) {
+        return codiceOtpRepository
+                .findTopByStudenteIdAndCodiceAndScadenzaAfterOrderByIdDesc(
+                        studenteId,
+                        codice,
+                        LocalDateTime.now()
+                )
+                .isPresent();
+    }
+
+    public void invalidaToken(Long studente_id) {
+        System.out.println("Token invalidato per studente_id: " + studente_id);
+    }
+
+    public boolean cercaPassword(Long studente_id, String vecchia_pwd) {
+        return queryPassword(studente_id, vecchia_pwd);
+    }
+
+    public boolean queryPassword(Long studente_id, String vecchia_pwd) {
+        if (studente_id == null || vecchia_pwd == null) {
+            return false;
+        }
+
+        return studenteRepository.findById(studente_id)
+                .filter(studente -> vecchia_pwd.equals(studente.getPassword()))
+                .isPresent();
+    }
+
+    public void inserisciPassword(Long studente_id, String nuova_pwd) {
+        insertPassword(studente_id, nuova_pwd);
+    }
+
+    public void insertPassword(Long studente_id, String nuova_pwd) {
+        if (studente_id == null || nuova_pwd == null) {
+            return;
+        }
+
+        studenteRepository.findById(studente_id).ifPresent(studente -> {
+            studente.setPassword(nuova_pwd);
+            studenteRepository.save(studente);
+        });
+    }
+
+    public void aggiornaDati(Long studente_id, Map<String, String> dati) {
+        // insertDati(studente_id, dati)
+        insertDati(studente_id, dati);
+    }
+
+    public void insertDati(Long studente_id, Map<String, String> dati) {
+        if (studente_id == null || dati == null) {
+            return;
+        }
+
+        studenteRepository.findById(studente_id).ifPresent(studente -> {
+            studente.setNome(dati.get("nome"));
+            studente.setCognome(dati.get("cognome"));
+            studente.setCorsoDiStudi(dati.get("CdS"));
+
+            setBioSeEsiste(studente, dati.get("bio"));
+
+            studenteRepository.save(studente);
+        });
+    }
+
+    private void setBioSeEsiste(Studente studente, String bio) {
+        try {
+            Method metodoSetBio = Studente.class.getMethod("setBio", String.class);
+            metodoSetBio.invoke(studente, bio);
+        } catch (Exception ignored) {
+            /*
+             * Nel sequence esiste bio.
+             * Se però nella entity Studente non esiste ancora il campo bio,
+             * non facciamo esplodere la compilazione.
+             */
+        }
+    }
+
+    public Studente checkPassword(Long studente_id, String password) {
+    return queryCheckPassword(studente_id, password);
+}
+
+public Studente queryCheckPassword(Long studente_id, String password) {
+    if (studente_id == null || password == null) {
+        return null;
+    }
+
+    return studenteRepository.findById(studente_id)
+            .filter(studente -> password.equals(studente.getPassword()))
+            .orElse(null);
+}
+
+public void cancellaStudente(Long studente_id) {
+    // deleteStudente(studente_id)
+    deleteStudente(studente_id);
+}
+
+public void deleteStudente(Long studente_id) {
+    if (studente_id == null) {
+        return;
+    }
+
+    studenteRepository.deleteById(studente_id);
+}
+
+public Studente verificaEsistenza(String mail) {
+    return queryVerificaEsistenza(mail);
+}
+
+public Studente queryVerificaEsistenza(String mail) {
+    if (mail == null) {
+        return null;
+    }
+
+    return studenteRepository.findByEmail(mail.trim()).orElse(null);
+}
+
+public void insertOTP(CodiceOTPEntity codiceOTP) {
+    CodiceOtp nuovoCodiceOtp = CodiceOtp.builder()
+            .studente(codiceOTP.getStudente())
+            .codice(codiceOTP.getCodice())
+            .scadenza(codiceOTP.getScadenza())
             .build();
 
-    studenteRepository.save(nuovoStudente);
+    codiceOtpRepository.save(nuovoCodiceOtp);
+}
+
+public void salvaPwd(Long studente_id, String password) {
+    // insertPwd(userID, password)
+    insertPwd(studente_id, password);
+}
+
+public void insertPwd(Long studente_id, String password) {
+    if (studente_id == null || password == null) {
+        return;
+    }
+
+    studenteRepository.findById(studente_id).ifPresent(studente -> {
+        studente.setPassword(password);
+        studenteRepository.save(studente);
+    });
+}
+
+public Studente codiceFiscaleExists(String codiceFiscale) {
+    return queryCodiceFiscaleExists(codiceFiscale);
+}
+
+public Studente queryCodiceFiscaleExists(String codiceFiscale) {
+    if (codiceFiscale == null) {
+        return null;
+    }
+
+    return studenteRepository.findByCodiceFiscale(codiceFiscale.trim().toUpperCase())
+            .orElse(null);
+}
+
+public void memorizzaDati(Studente studente) {
+    // insertMemorizzaDati(studente)
+    insertMemorizzaDati(studente);
+}
+
+public void insertMemorizzaDati(Studente studente) {
+    if (studente == null) {
+        return;
+    }
+
+    studenteRepository.save(studente);
 }
 }
