@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS licenze (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(255) NOT NULL,
     descrizione TEXT NOT NULL
-)
+);
 
 -- 2. Tabella Portfoli
 CREATE TABLE IF NOT EXISTS portfoli (

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import it.afam.is.progetto.afam_app.entity.CodiceOtp;
 import it.afam.is.progetto.afam_app.entity.Studente;
+import it.afam.is.progetto.afam_app.gestioneaccount.dto.CredenzialiRegistrazione;
 import it.afam.is.progetto.afam_app.repository.CodiceOtpRepository;
 import it.afam.is.progetto.afam_app.repository.StudenteRepository;
 
@@ -77,4 +78,18 @@ public class DBMSBoundary {
                 .findTopByStudenteIdAndCodiceAndScadenzaAfterOrderByIdDesc(studenteId, codice, LocalDateTime.now())
                 .isPresent();
     }
+
+    public void mandaCredenziali(CredenzialiRegistrazione credenziali) {
+    Studente nuovoStudente = Studente.builder()
+            .nome(credenziali.getNome().trim())
+            .cognome(credenziali.getCognome().trim())
+            .email(credenziali.getEmail().trim())
+            .password(credenziali.getPassword())
+            .codiceFiscale(credenziali.getCodiceFiscale().trim().toUpperCase())
+            .corsoDiStudi(credenziali.getCorsoDiStudi())
+            .provider_autenticazione("LOCAL")
+            .build();
+
+    studenteRepository.save(nuovoStudente);
+}
 }

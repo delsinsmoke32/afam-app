@@ -1,0 +1,27 @@
+package it.afam.is.progetto.afam_app.gestioneaccount.boundary;
+
+import javax.swing.JOptionPane;
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class PopupErroreBoundary {
+
+    public void mostraPopupErrore(String messaggio) {
+        JOptionPane.showMessageDialog(
+                null,
+                messaggio,
+                "Errore",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
+
+    public void mostraPopupSuccesso(String messaggio) {
+        JOptionPane.showMessageDialog(
+                null,
+                messaggio,
+                "Operazione completata",
+                JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+}
