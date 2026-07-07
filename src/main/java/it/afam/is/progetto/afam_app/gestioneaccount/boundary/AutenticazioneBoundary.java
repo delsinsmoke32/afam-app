@@ -88,3 +88,4 @@ public class AutenticazioneBoundary extends JFrame {
         mostraPaginaAuth();
     }
 }
+

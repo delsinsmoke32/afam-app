@@ -7,7 +7,7 @@ import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.boundary.EmailBoundary;
 import it.afam.is.progetto.afam_app.entity.CodiceOTPEntity;
 import it.afam.is.progetto.afam_app.entity.Sessione;
-import it.afam.is.progetto.afam_app.entity.Studente;
+import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.AutenticazioneBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.FormLoginBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.FormOTPBoundary;
@@ -24,7 +24,7 @@ public class LoginController {
     private final DBMSBoundary dbmsBoundary;
     private final EmailBoundary emailBoundary;
 
-    private Studente studente;
+    private StudenteEntity studente;
     private String codiceOTP;
     private LocalDateTime scadenzaOTP;
 
@@ -59,10 +59,13 @@ public class LoginController {
         if (studente != null) {
             scadenzaOTP = LocalDateTime.now().plusMinutes(3);
 
+            // generaCodiceOTP(studente_id, scadenza)
             CodiceOTPEntity codiceOTPEntity = generaCodiceOTP(studente.getId(), scadenzaOTP);
 
+            // salvaOTP(codiceOTP)
             dbmsBoundary.salvaOTP(codiceOTPEntity);
 
+            // InviaEmail(destinatario, oggetto, corpo)
             emailBoundary.InviaEmail(
                     studente.getEmail(),
                     "Codice OTP AFAM",
@@ -92,22 +95,28 @@ public class LoginController {
         int codice = RANDOM.nextInt(1_000_000);
         codiceOTP = String.format("%06d", codice);
 
-        return new CodiceOTPEntity(
-                studente,
-                codiceOTP,
-                scadenza
-        );
+        return CodiceOTPEntity.builder()
+                .studente(studente)
+                .codice(codiceOTP)
+                .scadenza(scadenza)
+                .build();
     }
 
     public void mandaOTP(String OTP) {
+        // ControllaOTP(OTP, codiceOTP)
         boolean otpCorretto = ControllaOTP(OTP, codiceOTP);
 
         if (otpCorretto) {
-        Sessione sessione = new Sessione();
-         sessione.login(studente);
-         PaginaPersonaleBoundary paginaPersonaleBoundary =
-         new PaginaPersonaleBoundary(autenticazioneBoundary, dbmsBoundary);
-         paginaPersonaleBoundary.mostraPaginaPersonale(studente); 
+            Sessione sessione = new Sessione();
+
+            // login(studente)
+            sessione.login(studente);
+
+            PaginaPersonaleBoundary paginaPersonaleBoundary =
+                    new PaginaPersonaleBoundary(autenticazioneBoundary, dbmsBoundary);
+
+            // mostraPaginaPersonale(studente)
+            paginaPersonaleBoundary.mostraPaginaPersonale(studente);
         } else {
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
             popupErroreBoundary.mostraPopup("OTP errato o scaduto.");

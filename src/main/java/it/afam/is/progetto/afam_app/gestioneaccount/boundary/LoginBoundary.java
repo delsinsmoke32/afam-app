@@ -6,3 +6,4 @@ public class LoginBoundary {
         System.out.println("Mostra schermata Login");
     }
 }
+

@@ -48,3 +48,5 @@ public class Sezione {
     @ToString.Exclude @EqualsAndHashCode.Exclude
     private List<Allegato> allegati;
 }
+
+

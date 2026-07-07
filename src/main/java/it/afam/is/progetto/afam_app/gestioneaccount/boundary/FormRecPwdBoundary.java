@@ -75,3 +75,4 @@ public class FormRecPwdBoundary extends JFrame {
         pwdRecController.mandaPwd(password, conf_password);
     }
 }
+

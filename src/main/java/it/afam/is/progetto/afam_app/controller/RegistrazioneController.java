@@ -21,7 +21,7 @@ public class RegistrazioneController {
 
     // DTO interno per ricevere i dati dal FormBoundary di Angular (messaggio 4: CliccaOK(credenziali))
     // Nota: nome/cognome non compaiono nel diagramma (InserisciCredenziali porta solo Mail, Password,
-    // CorsoDiStudi, CodiceFiscale), ma sono NOT NULL su Studente: aggiunti qui per rendere l'inserimento
+    // CorsoDiStudi, CodiceFiscale), ma sono NOT NULL su StudenteEntity: aggiunti qui per rendere l'inserimento
     // eseguibile, deviazione esplicita concordata rispetto al diagramma.
     public static class CredenzialiDTO {
         public String nome;
@@ -88,8 +88,9 @@ public class RegistrazioneController {
         return !dbmsBoundary.esisteCodiceFiscale(credenziali.codiceFiscale);
     }
 
-    // Non presente nel diagramma: email è UNIQUE su Studente quanto codiceFiscale (vedi DBMSBoundary.esisteEmail)
+    // Non presente nel diagramma: email è UNIQUE su StudenteEntity quanto codiceFiscale (vedi DBMSBoundary.esisteEmail)
     private boolean isEmailValid(CredenzialiDTO credenziali) {
         return !dbmsBoundary.esisteEmail(credenziali.email);
     }
 }
+

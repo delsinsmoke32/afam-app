@@ -52,3 +52,4 @@ public class PopupConfermaBoundary extends JFrame {
         cancProfController.annulla();
     }
 }
+

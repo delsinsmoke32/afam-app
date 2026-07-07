@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.boundary.EmailBoundary;
 import it.afam.is.progetto.afam_app.entity.CodiceOTPEntity;
-import it.afam.is.progetto.afam_app.entity.Studente;
+import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.repository.StudenteRepository;
 
 @RestController
@@ -37,7 +37,7 @@ public class LoginController {
     private EmailBoundary emailBoundary;
 
     @GetMapping("/utenti")
-    public List<Studente> getUtenti() {
+    public List<StudenteEntity> getUtenti() {
         return studenteRepository.findAll();
     }
 
@@ -69,7 +69,7 @@ public class LoginController {
                     .body(new LoginResponseDTO(false, "Tutti i campi obbligatori devono essere compilati."));
         }
 
-        Studente studente = dbmsBoundary.verificaEsistenzaCredenziali(
+        StudenteEntity studente = dbmsBoundary.verificaEsistenzaCredenziali(
                 credenziali.email,
                 credenziali.password
         );
@@ -82,11 +82,11 @@ public class LoginController {
         String codice = generaCodiceOtp();
         LocalDateTime scadenza = LocalDateTime.now().plusMinutes(3);
 
-        CodiceOTPEntity codiceOTPEntity = new CodiceOTPEntity(
-                studente,
-                codice,
-                scadenza
-        );
+        CodiceOTPEntity codiceOTPEntity = CodiceOTPEntity.builder()
+                .studente(studente)
+                .codice(codice)
+                .scadenza(scadenza)
+                .build();
 
         dbmsBoundary.salvaOTP(codiceOTPEntity);
 
@@ -102,7 +102,7 @@ public class LoginController {
     @PostMapping("/verifica-otp")
     public ResponseEntity<LoginResponseDTO> verificaOtp(@RequestBody OtpDTO otpDto) {
 
-        Studente studente = dbmsBoundary.trovaPerEmail(otpDto.email);
+        StudenteEntity studente = dbmsBoundary.trovaPerEmail(otpDto.email);
 
         if (studente != null && dbmsBoundary.trovaOtpValido(studente.getId(), otpDto.otp)) {
             return ResponseEntity.ok(new LoginResponseDTO(true, null));
@@ -124,4 +124,4 @@ public class LoginController {
         int codice = RANDOM.nextInt(1_000_000);
         return String.format("%06d", codice);
     }
-}   
+}

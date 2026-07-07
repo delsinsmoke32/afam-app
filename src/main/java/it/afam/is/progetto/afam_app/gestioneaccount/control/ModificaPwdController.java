@@ -2,7 +2,7 @@ package it.afam.is.progetto.afam_app.gestioneaccount.control;
 
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.entity.Sessione;
-import it.afam.is.progetto.afam_app.entity.Studente;
+import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.FormModPwdBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.GestioneProfiloBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.PopupErroreBoundary;
@@ -29,15 +29,15 @@ public class ModificaPwdController {
         formModPwdBoundary.chiudiForm();
 
         Sessione sessione = new Sessione();
-        Studente studente = sessione.getStudente();
+        StudenteEntity StudenteEntity = sessione.getStudente();
 
-        if (studente == null) {
+        if (StudenteEntity == null) {
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
             popupErroreBoundary.mostraPopup("Sessione non valida.");
             return;
         }
 
-        Long studente_id = studente.getId();
+        Long studente_id = StudenteEntity.getId();
 
         boolean vecchiaPwdEsiste = cercaPassword(studente_id, vecchia_pwd);
 
@@ -77,3 +77,4 @@ public class ModificaPwdController {
                 && nuova_pwd.length() >= 8;
     }
 }
+

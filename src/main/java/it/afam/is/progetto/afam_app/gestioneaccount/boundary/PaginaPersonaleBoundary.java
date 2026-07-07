@@ -8,7 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
-import it.afam.is.progetto.afam_app.entity.Studente;
+import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 
 public class PaginaPersonaleBoundary extends JFrame {
 
@@ -23,7 +23,7 @@ public class PaginaPersonaleBoundary extends JFrame {
         this.dbmsBoundary = dbmsBoundary;
     }
 
-    public void mostraPaginaPersonale(Studente studente) {
+    public void mostraPaginaPersonale(StudenteEntity StudenteEntity) {
         setTitle("Pagina personale");
         setSize(450, 280);
         setLocationRelativeTo(null);
@@ -31,7 +31,7 @@ public class PaginaPersonaleBoundary extends JFrame {
 
         JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
 
-        JLabel titolo = new JLabel("Benvenuto: " + studente.getEmail());
+        JLabel titolo = new JLabel("Benvenuto: " + StudenteEntity.getEmail());
 
         JButton gestioneProfiloButton = new JButton("Gestione profilo");
         JButton gestionePortfolioButton = new JButton("Gestione portfolio");
@@ -67,3 +67,4 @@ public class PaginaPersonaleBoundary extends JFrame {
         setVisible(true);
     }
 }
+

@@ -66,7 +66,7 @@ public class ModDatiPersController {
                 // mostraPopup(testo)
                 popupErroreBoundary.mostraPopup("Dati personali non validi.");
 
-                // Studente -> PopupErroreBoundary: cliccaOK()
+                // StudenteEntity -> PopupErroreBoundary: cliccaOK()
                 // gestito dal popup
 
                 // mostraGestioneProfilo()
@@ -81,7 +81,7 @@ public class ModDatiPersController {
             // mostraPopup(testo)
             popupErroreBoundary.mostraPopup("I dati personali non possono essere vuoti.");
 
-            // Studente -> PopupErroreBoundary: cliccaOK()
+            // StudenteEntity -> PopupErroreBoundary: cliccaOK()
             // gestito dal popup
 
             // mostraGestioneProfilo()
@@ -124,3 +124,4 @@ public class ModDatiPersController {
         return valore == null || valore.trim().isEmpty();
     }
 }
+

@@ -91,3 +91,4 @@ public class FormRegistrazioneBoundary extends JFrame {
         dispose();
     }
 }
+

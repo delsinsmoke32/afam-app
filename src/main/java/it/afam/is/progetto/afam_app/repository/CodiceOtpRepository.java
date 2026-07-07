@@ -6,16 +6,17 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import it.afam.is.progetto.afam_app.entity.CodiceOtp;
+import it.afam.is.progetto.afam_app.entity.CodiceOTPEntity;
 
 @Repository
-public interface CodiceOtpRepository extends JpaRepository<CodiceOtp, Long> {
+public interface CodiceOtpRepository extends JpaRepository<CodiceOTPEntity, Long> {
 
-    // Messaggio 16.1.1 del Sequence Diagram Login2FA: ControllaOTP (verifica codice non scaduto)
-    Optional<CodiceOtp> findTopByStudenteIdAndCodiceAndScadenzaAfterOrderByIdDesc(
-            Long studenteId, String codice, LocalDateTime adesso);
+    // Messaggio 16.1.1 del Sequence Diagram Login2FA: ControllaOTP
+    Optional<CodiceOTPEntity> findTopByStudenteIdAndCodiceAndScadenzaAfterOrderByIdDesc(
+            Long studenteId,
+            String codice,
+            LocalDateTime adesso
+    );
 
-    // Non presente nel diagramma: senza questo, ogni login riuscito accumula una riga nuova
-    // in codici_otp senza mai ripulire le precedenti (già scadute/inutilizzabili).
     void deleteByStudenteId(Long studenteId);
 }

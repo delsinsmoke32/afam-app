@@ -18,3 +18,4 @@ public class CredenzialiLogin {
         return password;
     }
 }
+

@@ -39,3 +39,4 @@ public class LinkCondiviso {
     @ToString.Exclude @EqualsAndHashCode.Exclude
     private Portfolio portfolio;
 }
+

@@ -112,3 +112,4 @@ public class PwdRecBoundary extends JFrame {
         pwdRecController.mandaOTP(OTP);
     }
 }
+

@@ -1,6 +1,5 @@
 package it.afam.is.progetto.afam_app.boundary;
 
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -9,8 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import it.afam.is.progetto.afam_app.entity.CodiceOTPEntity;
-import it.afam.is.progetto.afam_app.entity.CodiceOtp;
-import it.afam.is.progetto.afam_app.entity.Studente;
+import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.dto.CredenzialiRegistrazione;
 import it.afam.is.progetto.afam_app.repository.CodiceOtpRepository;
 import it.afam.is.progetto.afam_app.repository.StudenteRepository;
@@ -32,7 +30,7 @@ public class DBMSBoundary {
             String corsoDiStudi,
             String codiceFiscale
     ) {
-        Studente nuovoStudente = Studente.builder()
+        StudenteEntity nuovoStudente = StudenteEntity.builder()
                 .nome(nome)
                 .cognome(cognome)
                 .email(email)
@@ -53,36 +51,39 @@ public class DBMSBoundary {
         return studenteRepository.existsByEmail(email);
     }
 
-    public Studente verificaEsistenzaCredenziali(String mail, String password) {
+    public StudenteEntity verificaEsistenzaCredenziali(String mail, String password) {
         return queryVerificaEsistenzaCredenziali(mail, password);
     }
 
-    public Studente queryVerificaEsistenzaCredenziali(String mail, String password) {
-        Optional<Studente> studente = studenteRepository.findByEmailAndPassword(mail.trim(), password);
+    public StudenteEntity queryVerificaEsistenzaCredenziali(String mail, String password) {
+        Optional<StudenteEntity> studente = studenteRepository.findByEmailAndPassword(mail.trim(), password);
         return studente.orElse(null);
     }
 
-   public void salvaOTP(CodiceOTPEntity codiceOTP) {
-    // insertOTP(codiceOTP)
-    insertOTP(codiceOTP);
-}
-
-    public void insertSalvaOTP(CodiceOTPEntity codiceOTP) {
-        CodiceOtp nuovoCodiceOtp = CodiceOtp.builder()
-                .studente(codiceOTP.getStudente())
-                .codice(codiceOTP.getCodice())
-                .scadenza(codiceOTP.getScadenza())
-                .build();
-
-        codiceOtpRepository.save(nuovoCodiceOtp);
+    public void salvaOTP(CodiceOTPEntity codiceOTP) {
+        // insertOTP(codiceOTP)
+        insertOTP(codiceOTP);
     }
 
-    public void insertInserisciStudente(Studente studente) {
+    public void insertOTP(CodiceOTPEntity codiceOTP) {
+        if (codiceOTP == null) {
+            return;
+        }
+
+        codiceOtpRepository.save(codiceOTP);
+    }
+
+    public void insertSalvaOTP(CodiceOTPEntity codiceOTP) {
+        // insertOTP(codiceOTP)
+        insertOTP(codiceOTP);
+    }
+
+    public void insertInserisciStudente(StudenteEntity studente) {
         studenteRepository.save(studente);
     }
 
     public void mandaCredenziali(CredenzialiRegistrazione credenziali) {
-        Studente nuovoStudente = Studente.builder()
+        StudenteEntity nuovoStudente = StudenteEntity.builder()
                 .nome(credenziali.getNome().trim())
                 .cognome(credenziali.getCognome().trim())
                 .email(credenziali.getEmail().trim())
@@ -95,7 +96,7 @@ public class DBMSBoundary {
         studenteRepository.save(nuovoStudente);
     }
 
-    public Studente trovaPerEmail(String email) {
+    public StudenteEntity trovaPerEmail(String email) {
         return studenteRepository.findByEmail(email).orElse(null);
     }
 
@@ -156,114 +157,90 @@ public class DBMSBoundary {
             studente.setNome(dati.get("nome"));
             studente.setCognome(dati.get("cognome"));
             studente.setCorsoDiStudi(dati.get("CdS"));
-
-            setBioSeEsiste(studente, dati.get("bio"));
+            studente.setBiografia(dati.get("bio"));
 
             studenteRepository.save(studente);
         });
     }
 
-    private void setBioSeEsiste(Studente studente, String bio) {
-        try {
-            Method metodoSetBio = Studente.class.getMethod("setBio", String.class);
-            metodoSetBio.invoke(studente, bio);
-        } catch (Exception ignored) {
-            /*
-             * Nel sequence esiste bio.
-             * Se però nella entity Studente non esiste ancora il campo bio,
-             * non facciamo esplodere la compilazione.
-             */
+    public StudenteEntity checkPassword(Long studente_id, String password) {
+        return queryCheckPassword(studente_id, password);
+    }
+
+    public StudenteEntity queryCheckPassword(Long studente_id, String password) {
+        if (studente_id == null || password == null) {
+            return null;
         }
+
+        return studenteRepository.findById(studente_id)
+                .filter(studente -> password.equals(studente.getPassword()))
+                .orElse(null);
     }
 
-    public Studente checkPassword(Long studente_id, String password) {
-    return queryCheckPassword(studente_id, password);
-}
-
-public Studente queryCheckPassword(Long studente_id, String password) {
-    if (studente_id == null || password == null) {
-        return null;
+    public void cancellaStudente(Long studente_id) {
+        // deleteStudente(studente_id)
+        deleteStudente(studente_id);
     }
 
-    return studenteRepository.findById(studente_id)
-            .filter(studente -> password.equals(studente.getPassword()))
-            .orElse(null);
-}
+    public void deleteStudente(Long studente_id) {
+        if (studente_id == null) {
+            return;
+        }
 
-public void cancellaStudente(Long studente_id) {
-    // deleteStudente(studente_id)
-    deleteStudente(studente_id);
-}
-
-public void deleteStudente(Long studente_id) {
-    if (studente_id == null) {
-        return;
+        studenteRepository.deleteById(studente_id);
     }
 
-    studenteRepository.deleteById(studente_id);
-}
-
-public Studente verificaEsistenza(String mail) {
-    return queryVerificaEsistenza(mail);
-}
-
-public Studente queryVerificaEsistenza(String mail) {
-    if (mail == null) {
-        return null;
+    public StudenteEntity verificaEsistenza(String mail) {
+        return queryVerificaEsistenza(mail);
     }
 
-    return studenteRepository.findByEmail(mail.trim()).orElse(null);
-}
+    public StudenteEntity queryVerificaEsistenza(String mail) {
+        if (mail == null) {
+            return null;
+        }
 
-public void insertOTP(CodiceOTPEntity codiceOTP) {
-    CodiceOtp nuovoCodiceOtp = CodiceOtp.builder()
-            .studente(codiceOTP.getStudente())
-            .codice(codiceOTP.getCodice())
-            .scadenza(codiceOTP.getScadenza())
-            .build();
-
-    codiceOtpRepository.save(nuovoCodiceOtp);
-}
-
-public void salvaPwd(Long studente_id, String password) {
-    // insertPwd(userID, password)
-    insertPwd(studente_id, password);
-}
-
-public void insertPwd(Long studente_id, String password) {
-    if (studente_id == null || password == null) {
-        return;
+        return studenteRepository.findByEmail(mail.trim()).orElse(null);
     }
 
-    studenteRepository.findById(studente_id).ifPresent(studente -> {
-        studente.setPassword(password);
+    public void salvaPwd(Long studente_id, String password) {
+        // insertPwd(userID, password)
+        insertPwd(studente_id, password);
+    }
+
+    public void insertPwd(Long studente_id, String password) {
+        if (studente_id == null || password == null) {
+            return;
+        }
+
+        studenteRepository.findById(studente_id).ifPresent(studente -> {
+            studente.setPassword(password);
+            studenteRepository.save(studente);
+        });
+    }
+
+    public StudenteEntity codiceFiscaleExists(String codiceFiscale) {
+        return queryCodiceFiscaleExists(codiceFiscale);
+    }
+
+    public StudenteEntity queryCodiceFiscaleExists(String codiceFiscale) {
+        if (codiceFiscale == null) {
+            return null;
+        }
+
+        return studenteRepository.findByCodiceFiscale(codiceFiscale.trim().toUpperCase())
+                .orElse(null);
+    }
+
+    public void memorizzaDati(StudenteEntity studente) {
+        // insertMemorizzaDati(studente)
+        insertMemorizzaDati(studente);
+    }
+
+    public void insertMemorizzaDati(StudenteEntity studente) {
+        if (studente == null) {
+            return;
+        }
+
         studenteRepository.save(studente);
-    });
-}
-
-public Studente codiceFiscaleExists(String codiceFiscale) {
-    return queryCodiceFiscaleExists(codiceFiscale);
-}
-
-public Studente queryCodiceFiscaleExists(String codiceFiscale) {
-    if (codiceFiscale == null) {
-        return null;
     }
-
-    return studenteRepository.findByCodiceFiscale(codiceFiscale.trim().toUpperCase())
-            .orElse(null);
-}
-
-public void memorizzaDati(Studente studente) {
-    // insertMemorizzaDati(studente)
-    insertMemorizzaDati(studente);
-}
-
-public void insertMemorizzaDati(Studente studente) {
-    if (studente == null) {
-        return;
-    }
-
-    studenteRepository.save(studente);
-}
 }

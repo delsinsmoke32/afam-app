@@ -4,7 +4,7 @@ import javax.swing.JPasswordField;
 
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.entity.Sessione;
-import it.afam.is.progetto.afam_app.entity.Studente;
+import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.AutenticazioneBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.FormCancellazioneBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.GestioneProfiloBoundary;
@@ -62,17 +62,17 @@ public class CancProfController {
         Long studente_id = Sessione.getStudenteId();
 
         // checkPassword(studente_id, password)
-        Studente studente = dbmsBoundary.checkPassword(studente_id, password);
+        StudenteEntity StudenteEntity = dbmsBoundary.checkPassword(studente_id, password);
 
         // alt
-        // [studente != null]
-        if (studente != null) {
+        // [StudenteEntity != null]
+        if (StudenteEntity != null) {
 
             // cancellaStudente(studente_id)
             dbmsBoundary.cancellaStudente(studente_id);
 
             // <<destroy>> StudenteEntity
-            // Nel codice reale StudenteEntity è Studente: viene eliminato dal DB.
+            // Nel codice reale StudenteEntity è StudenteEntity: viene eliminato dal DB.
 
             // logout()
             Sessione sessione = new Sessione();
@@ -84,7 +84,7 @@ public class CancProfController {
             // mostraPopup(testo)
             popupSuccessoBoundary.mostraPopup("Account eliminato con successo.");
 
-            // Studente -> PopupSuccessoBoundary: cliccaOK()
+            // StudenteEntity -> PopupSuccessoBoundary: cliccaOK()
             // gestito dal popup
 
             // mostraAutenticazione()
@@ -99,7 +99,7 @@ public class CancProfController {
             // mostraPopup(testo)
             popupErroreBoundary.mostraPopup("Password errata. Account non eliminato.");
 
-            // Studente -> PopupErroreBoundary: cliccaOK()
+            // StudenteEntity -> PopupErroreBoundary: cliccaOK()
             // gestito dal popup
 
             // mostraGestioneProfilo()
@@ -118,3 +118,4 @@ public class CancProfController {
     gestioneProfiloBoundary.mostraGestioneProfilo();
 }
 }
+

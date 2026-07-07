@@ -5,7 +5,7 @@ import java.util.Map;
 
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.entity.Sessione;
-import it.afam.is.progetto.afam_app.entity.Studente;
+import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.AutenticazioneBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.FormSPIDBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.ListaProviderBoundary;
@@ -24,7 +24,7 @@ public class SPIDController {
 
     private Map<String, String> attestazione;
     private Map<String, String> dati;
-    private Studente studente;
+    private StudenteEntity StudenteEntity;
 
     public SPIDController(
             AutenticazioneBoundary autenticazioneBoundary,
@@ -62,11 +62,11 @@ public class SPIDController {
             dati = estraiDati(attestazione);
 
             // codiceFiscaleExists(dati.codiceFiscale)
-            studente = dbmsBoundary.codiceFiscaleExists(dati.get("codiceFiscale"));
+            StudenteEntity = dbmsBoundary.codiceFiscaleExists(dati.get("codiceFiscale"));
 
             // alt
-            // [studente = NULL]
-            if (studente == null) {
+            // [StudenteEntity = NULL]
+            if (StudenteEntity == null) {
 
                 // <<create>> FormSPIDBoundary
                 formSPIDBoundary = new FormSPIDBoundary(this);
@@ -75,9 +75,9 @@ public class SPIDController {
                 formSPIDBoundary.mostraForm();
 
             } else {
-                // studente già presente: login diretto
-                login(studente);
-                mostraPaginaPersonale(studente);
+                // StudenteEntity già presente: login diretto
+                login(StudenteEntity);
+                mostraPaginaPersonale(StudenteEntity);
             }
 
         } else {
@@ -110,8 +110,8 @@ public class SPIDController {
 
     public void mandaDatiAgg(String CdS, String bio, String link) {
         // <<create>> StudenteEntity
-        // Nel codice reale StudenteEntity = Studente
-        studente = Studente.builder()
+        // Nel codice reale StudenteEntity = StudenteEntity
+        StudenteEntity = StudenteEntity.builder()
                 .nome(dati.get("nome"))
                 .cognome(dati.get("cognome"))
                 .email(dati.get("email"))
@@ -121,11 +121,11 @@ public class SPIDController {
                 .provider_autenticazione(dati.get("provider"))
                 .build();
 
-        setBioSeEsiste(studente, bio);
-        setLinkEsternoSeEsiste(studente, link);
+        setBioSeEsiste(StudenteEntity, bio);
+        setLinkEsternoSeEsiste(StudenteEntity, link);
 
-        // memorizzaDati(studente)
-        dbmsBoundary.memorizzaDati(studente);
+        // memorizzaDati(StudenteEntity)
+        dbmsBoundary.memorizzaDati(StudenteEntity);
 
         // <<destroy>> FormSPIDBoundary
         if (formSPIDBoundary != null) {
@@ -133,40 +133,41 @@ public class SPIDController {
             formSPIDBoundary = null;
         }
 
-        // login(studente)
-        login(studente);
+        // login(StudenteEntity)
+        login(StudenteEntity);
 
-        // mostraPaginaPersonale(studente)
-        mostraPaginaPersonale(studente);
+        // mostraPaginaPersonale(StudenteEntity)
+        mostraPaginaPersonale(StudenteEntity);
     }
 
-    public void login(Studente studente) {
+    public void login(StudenteEntity StudenteEntity) {
         Sessione sessione = new Sessione();
-        sessione.login(studente);
+        sessione.login(StudenteEntity);
     }
 
-  public void mostraPaginaPersonale(Studente studente) {
+  public void mostraPaginaPersonale(StudenteEntity StudenteEntity) {
     // <<create>> PaginaPersonaleBoundary
     PaginaPersonaleBoundary paginaPersonaleBoundary =
             new PaginaPersonaleBoundary(autenticazioneBoundary, dbmsBoundary);
 
-    // mostraPaginaPersonale(studente)
-    paginaPersonaleBoundary.mostraPaginaPersonale(studente);
+    // mostraPaginaPersonale(StudenteEntity)
+    paginaPersonaleBoundary.mostraPaginaPersonale(StudenteEntity);
 }
 
-    private void setBioSeEsiste(Studente studente, String bio) {
+    private void setBioSeEsiste(StudenteEntity StudenteEntity, String bio) {
         try {
-            Method metodoSetBio = Studente.class.getMethod("setBio", String.class);
-            metodoSetBio.invoke(studente, bio);
+            Method metodoSetBio = StudenteEntity.class.getMethod("setBio", String.class);
+            metodoSetBio.invoke(StudenteEntity, bio);
         } catch (Exception ignored) {
         }
     }
 
-    private void setLinkEsternoSeEsiste(Studente studente, String link) {
+    private void setLinkEsternoSeEsiste(StudenteEntity StudenteEntity, String link) {
         try {
-            Method metodoSetLink = Studente.class.getMethod("setLinkEsterno", String.class);
-            metodoSetLink.invoke(studente, link);
+            Method metodoSetLink = StudenteEntity.class.getMethod("setLinkEsterno", String.class);
+            metodoSetLink.invoke(StudenteEntity, link);
         } catch (Exception ignored) {
         }
     }
 }
+

@@ -1,7 +1,6 @@
 package it.afam.is.progetto.afam_app.gestioneaccount.control;
 
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
-import it.afam.is.progetto.afam_app.entity.Studente;
 import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.AutenticazioneBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.FormRegistrazioneBoundary;
@@ -26,6 +25,7 @@ public class RegistrazioneController {
         if (!verificaCredenzialiNotEmpty(credenziali)) {
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
             popupErroreBoundary.mostraPopupErrore();
+
             autenticazioneBoundary.mostraAutenticazione();
             return;
         }
@@ -33,7 +33,8 @@ public class RegistrazioneController {
         boolean verificaCredenziali = verificaCredenziali(credenziali);
 
         if (verificaCredenziali) {
-            Studente studente = Studente.builder()
+            // <<create>> StudenteEntity
+            StudenteEntity studente = StudenteEntity.builder()
                     .nome(credenziali.getNome().trim())
                     .cognome(credenziali.getCognome().trim())
                     .email(credenziali.getEmail().trim())
@@ -43,8 +44,8 @@ public class RegistrazioneController {
                     .provider_autenticazione("LOCAL")
                     .build();
 
-            StudenteEntity studenteEntity = new StudenteEntity(dbmsBoundary);
-            studenteEntity.inserisciStudente(studente);
+            // inserisciStudente(studente)
+            inserisciStudente(studente);
 
             autenticazioneBoundary.mostraAutenticazione();
         } else {
@@ -53,6 +54,11 @@ public class RegistrazioneController {
 
             autenticazioneBoundary.mostraAutenticazione();
         }
+    }
+
+    public void inserisciStudente(StudenteEntity studente) {
+        // insertInserisciStudente(studente)
+        dbmsBoundary.insertInserisciStudente(studente);
     }
 
     public boolean verificaCredenzialiNotEmpty(CredenzialiRegistrazione credenziali) {

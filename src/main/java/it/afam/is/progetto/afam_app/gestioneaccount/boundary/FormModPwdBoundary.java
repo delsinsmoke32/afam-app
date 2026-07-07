@@ -78,3 +78,4 @@ public class FormModPwdBoundary extends JFrame {
         dispose();
     }
 }
+

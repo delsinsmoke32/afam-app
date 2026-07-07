@@ -41,9 +41,11 @@ public class Portfolio {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "studente_id", nullable = false)
     @ToString.Exclude @EqualsAndHashCode.Exclude
-    private Studente studente;
+    private StudenteEntity StudenteEntity;
 
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude @EqualsAndHashCode.Exclude
     private List<Sezione> sezioni;
 }
+
+

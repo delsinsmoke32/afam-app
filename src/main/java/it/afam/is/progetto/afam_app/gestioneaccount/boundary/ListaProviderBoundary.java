@@ -64,3 +64,4 @@ public class ListaProviderBoundary extends JFrame {
         spidController.providerScelto(provider_id);
     }
 }
+

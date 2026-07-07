@@ -6,7 +6,7 @@ import java.util.Random;
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.boundary.EmailBoundary;
 import it.afam.is.progetto.afam_app.entity.CodiceOTPEntity;
-import it.afam.is.progetto.afam_app.entity.Studente;
+import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.AutenticazioneBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.FormRecPwdBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.PopupErroreBoundary;
@@ -22,7 +22,7 @@ public class PwdRecController {
     private PwdRecBoundary pwdRecBoundary;
     private FormRecPwdBoundary formRecPwdBoundary;
 
-    private Studente studente;
+    private StudenteEntity studente;
     private CodiceOTPEntity codiceOTP;
 
     public PwdRecController(
@@ -71,9 +71,6 @@ public class PwdRecController {
             // mostraPopup(testo)
             popupSuccessoBoundary.mostraPopup("Codice OTP inviato via email.");
 
-            // Utente -> PopupSuccessoBoundary: cliccaOK()
-            // gestito dal popup
-
             // mostraFormOTP()
             pwdRecBoundary.mostraFormOTP();
 
@@ -85,9 +82,6 @@ public class PwdRecController {
             // mostraPopup(testo)
             popupErroreBoundary.mostraPopup("Email non trovata.");
 
-            // Utente -> PopupErroreBoundary: CliccaOK()
-            // gestito dal popup
-
             // mostraAutenticazione()
             autenticazioneBoundary.mostraAutenticazione();
         }
@@ -96,7 +90,11 @@ public class PwdRecController {
     public CodiceOTPEntity generaCodiceOTP(Long studente_id, LocalDateTime scadenza) {
         String codice = String.format("%06d", new Random().nextInt(999999));
 
-        return new CodiceOTPEntity(studente, codice, scadenza);
+        return CodiceOTPEntity.builder()
+                .studente(studente)
+                .codice(codice)
+                .scadenza(scadenza)
+                .build();
     }
 
     public void mandaOTP(String OTP) {
@@ -120,9 +118,6 @@ public class PwdRecController {
 
             // mostraPopup(testo)
             popupErroreBoundary.mostraPopup("Codice OTP errato.");
-
-            // Utente -> PopupErroreBoundary: cliccaOK()
-            // gestito dal popup
 
             // mostraAutenticazione()
             autenticazioneBoundary.mostraAutenticazione();
@@ -160,9 +155,6 @@ public class PwdRecController {
 
             // mostraPopup(testo)
             popupErroreBoundary.mostraPopup("Le password non coincidono o sono vuote.");
-
-            // Utente -> PopupErroreBoundary: cliccaOK()
-            // gestito dal popup
 
             // mostraAutenticazione()
             autenticazioneBoundary.mostraAutenticazione();

@@ -64,3 +64,4 @@ public class FormCancellazioneBoundary extends JFrame {
         cancProfController.mandaPassword(password);
     }
 }
+

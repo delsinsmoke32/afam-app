@@ -35,3 +35,5 @@ public class StatisticaAccesso {
     @PrePersist
     protected void onCreate() { this.dataOraAccesso = LocalDateTime.now(); }
 }
+
+

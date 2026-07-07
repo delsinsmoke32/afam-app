@@ -47,3 +47,4 @@ public class Allegato {
     @ToString.Exclude @EqualsAndHashCode.Exclude
     private Sezione sezione;
 }
+

@@ -23,3 +23,4 @@ public class AfamAppApplication {
         return args -> SwingUtilities.invokeLater(autenticazioneBoundary::mostraPaginaAuth);
     }
 }
+

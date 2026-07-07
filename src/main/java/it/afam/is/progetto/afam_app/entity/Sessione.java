@@ -2,29 +2,30 @@ package it.afam.is.progetto.afam_app.entity;
 
 public class Sessione {
 
-    private static Studente studente;
+    private static StudenteEntity StudenteEntity;
 
-    public void login(Studente studente) {
-        Sessione.studente = studente;
+    public void login(StudenteEntity StudenteEntity) {
+        Sessione.StudenteEntity = StudenteEntity;
     }
 
     public void logout() {
-        Sessione.studente = null;
+        Sessione.StudenteEntity = null;
     }
 
-    public Studente getStudente() {
-        return studente;
+    public StudenteEntity getStudente() {
+        return StudenteEntity;
     }
 
-    public static Studente getStudenteCorrente() {
-        return studente;
+    public static StudenteEntity getStudenteCorrente() {
+        return StudenteEntity;
     }
 
     public static Long getStudenteId() {
-        if (studente == null) {
+        if (StudenteEntity == null) {
             return null;
         }
 
-        return studente.getId();
+        return StudenteEntity.getId();
     }
 }
+

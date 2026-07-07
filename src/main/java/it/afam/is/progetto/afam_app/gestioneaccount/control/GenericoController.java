@@ -2,7 +2,7 @@ package it.afam.is.progetto.afam_app.gestioneaccount.control;
 
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.entity.Sessione;
-import it.afam.is.progetto.afam_app.entity.Studente;
+import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.AutenticazioneBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.PopupErroreBoundary;
 
@@ -22,12 +22,12 @@ public class GenericoController {
     public void azioneRiservata() {
         if (rilevaTokenScaduto()) {
             Sessione sessione = new Sessione();
-            Studente studente = sessione.getStudente();
+            StudenteEntity StudenteEntity = sessione.getStudente();
 
             Long studente_id = null;
 
-            if (studente != null) {
-                studente_id = studente.getId();
+            if (StudenteEntity != null) {
+                studente_id = StudenteEntity.getId();
             }
 
             dbmsBoundary.invalidaToken(studente_id);
@@ -45,3 +45,4 @@ public class GenericoController {
         return true;
     }
 }
+
