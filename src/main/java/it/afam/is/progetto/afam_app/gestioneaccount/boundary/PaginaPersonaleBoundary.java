@@ -23,18 +23,18 @@ public class PaginaPersonaleBoundary extends JFrame {
         this.dbmsBoundary = dbmsBoundary;
     }
 
-    public void mostraPaginaPersonale(StudenteEntity StudenteEntity) {
+    public void mostraPaginaPersonale(StudenteEntity studente) {
         setTitle("Pagina personale");
         setSize(450, 280);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
 
-        JLabel titolo = new JLabel("Benvenuto: " + StudenteEntity.getEmail());
+        JLabel titolo = new JLabel("Benvenuto: " + studente.getEmail());
 
         JButton gestioneProfiloButton = new JButton("Gestione profilo");
-        JButton gestionePortfolioButton = new JButton("Gestione PortfolioEntity");
+        JButton gestionePortfolioButton = new JButton("Gestione Portfolio");
         JButton logoutButton = new JButton("Logout");
 
         panel.add(titolo);
@@ -42,17 +42,9 @@ public class PaginaPersonaleBoundary extends JFrame {
         panel.add(gestionePortfolioButton);
         panel.add(logoutButton);
 
-        gestioneProfiloButton.addActionListener(e -> {
-            GestioneProfiloBoundary gestioneProfiloBoundary =
-                    new GestioneProfiloBoundary(autenticazioneBoundary, dbmsBoundary);
+        gestioneProfiloButton.addActionListener(e -> cliccaGestioneProfilo());
 
-            gestioneProfiloBoundary.mostraGestioneProfilo();
-        });
-
-        gestionePortfolioButton.addActionListener(e -> {
-            PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
-            popupErroreBoundary.mostraPopup("Gestione PortfolioEntity non ancora implementata.");
-        });
+        gestionePortfolioButton.addActionListener(e -> cliccaGestionePortfolio());
 
         logoutButton.addActionListener(e -> {
             GestioneProfiloBoundary gestioneProfiloBoundary =
@@ -66,7 +58,18 @@ public class PaginaPersonaleBoundary extends JFrame {
         setContentPane(panel);
         setVisible(true);
     }
+
+    public void cliccaGestioneProfilo() {
+        GestioneProfiloBoundary gestioneProfiloBoundary =
+                new GestioneProfiloBoundary(autenticazioneBoundary, dbmsBoundary);
+
+        gestioneProfiloBoundary.mostraGestioneProfilo();
+    }
+
+    public void cliccaGestionePortfolio() {
+        GestionePortfolioBoundary gestionePortfolioBoundary =
+                new GestionePortfolioBoundary(dbmsBoundary);
+
+        gestionePortfolioBoundary.mostraGestionePortfolio();
+    }
 }
-
-
-

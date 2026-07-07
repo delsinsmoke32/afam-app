@@ -385,4 +385,31 @@ public void updateMetadati(Long allegato_id, String titolo, String descrizione, 
         allegatoRepository.save(allegato);
     });
 }
+
+public String recuperaPercorsoAllegato(Long allegato_id) {
+    return queryPercorsoAllegato(allegato_id);
+}
+
+public String queryPercorsoAllegato(Long allegato_id) {
+    if (allegato_id == null) {
+        return null;
+    }
+
+    return allegatoRepository.findById(allegato_id)
+            .map(AllegatoEntity::getPercorsoRisorsa)
+            .orElse(null);
+}
+
+public void rimuoviAllegato(Long allegato_id) {
+    // deleteAllegato(allegato_id)
+    deleteAllegato(allegato_id);
+}
+
+public void deleteAllegato(Long allegato_id) {
+    if (allegato_id == null) {
+        return;
+    }
+
+    allegatoRepository.deleteById(allegato_id);
+}
 }

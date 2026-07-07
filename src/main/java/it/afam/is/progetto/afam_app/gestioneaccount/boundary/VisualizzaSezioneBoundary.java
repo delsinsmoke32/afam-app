@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.boundary.FileStorageBoundary;
 import it.afam.is.progetto.afam_app.entity.AllegatoEntity;
+import it.afam.is.progetto.afam_app.gestioneaccount.control.CancellazioneFileController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.GestioneAllegatiController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.ModificaMetadatiController;
 
@@ -32,7 +33,7 @@ public class VisualizzaSezioneBoundary extends JFrame {
 
     public void mostraSezioneInit(List<AllegatoEntity> listaAllegati) {
         setTitle("Visualizza Sezione");
-        setSize(650, 450);
+        setSize(700, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -56,12 +57,16 @@ public class VisualizzaSezioneBoundary extends JFrame {
                 );
 
                 JButton modificaButton = new JButton("Modifica metadati");
-
-                // cliccaModificaMetadati()
                 modificaButton.addActionListener(e -> cliccaModificaMetadati(allegato.getId()));
+
+                JButton eliminaButton = new JButton("Elimina file");
+
+                // cliccaEliminaFile()
+                eliminaButton.addActionListener(e -> cliccaEliminaFile(allegato.getId()));
 
                 panel.add(allegatoLabel);
                 panel.add(modificaButton);
+                panel.add(eliminaButton);
             }
         }
 
@@ -107,7 +112,20 @@ public class VisualizzaSezioneBoundary extends JFrame {
         modificaMetadatiController.richiediModificaMetadati(allegato_id);
     }
 
+    public void cliccaEliminaFile(Long allegato_id) {
+        // <<create>> CancellazioneFileController
+        CancellazioneFileController cancellazioneFileController =
+                new CancellazioneFileController(this, dbmsBoundary, fileStorageBoundary);
+
+        // richiediCancellazioneFile(allegato_id)
+        cancellazioneFileController.richiediCancellazioneFile(allegato_id);
+    }
+
     public void mostraSezioneAggiungiAllegato(AllegatoEntity allegato) {
+        mostraSezione();
+    }
+
+    public void mostraSezioneRimuoviAllegato(Long allegato_id) {
         mostraSezione();
     }
 

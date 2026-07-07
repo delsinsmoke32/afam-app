@@ -41,4 +41,25 @@ public class FileStorageBoundary {
             return null;
         }
     }
+
+    public void eliminaFile(String pathAllegato) {
+        // deleteFile(pathAllegato)
+        deleteFile(pathAllegato);
+    }
+
+    public void deleteFile(String pathAllegato) {
+        if (pathAllegato == null || pathAllegato.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            Path path = Path.of(pathAllegato);
+
+            if (Files.exists(path) && Files.isRegularFile(path)) {
+                Files.delete(path);
+            }
+        } catch (IOException e) {
+            System.out.println("Errore eliminazione file: " + e.getMessage());
+        }
+    }
 }
