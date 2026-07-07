@@ -1,6 +1,6 @@
 package it.afam.is.progetto.afam_app.gestioneaccount.boundary;
 
-import java.awt.BorderLayout;
+import java.awt.GridLayout;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -16,6 +16,8 @@ public class PopupConfermaBoundary extends JFrame {
     private Runnable azioneConferma;
     private Runnable azioneAnnulla;
 
+    private boolean soloOK = false;
+
     public PopupConfermaBoundary(CancProfController cancProfController) {
         this.cancProfController = cancProfController;
     }
@@ -25,32 +27,38 @@ public class PopupConfermaBoundary extends JFrame {
         this.azioneAnnulla = azioneAnnulla;
     }
 
+    public PopupConfermaBoundary(Runnable azioneOK) {
+        this.azioneConferma = azioneOK;
+        this.soloOK = true;
+    }
+
     public void mostraPopup(String testo) {
         setTitle("Conferma");
-        setSize(420, 160);
+        setSize(420, 180);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JLabel label = new JLabel(testo, JLabel.CENTER);
+        JPanel panel = new JPanel(new GridLayout(0, 1));
 
-        JButton confermaButton = new JButton("Conferma");
-        JButton annullaButton = new JButton("Annulla");
+        JLabel messaggio = new JLabel(testo);
 
-        JPanel panelBottoni = new JPanel();
-        panelBottoni.add(confermaButton);
-        panelBottoni.add(annullaButton);
-
+        JButton confermaButton = new JButton(soloOK ? "OK" : "Conferma");
         confermaButton.addActionListener(e -> cliccaConferma());
-        annullaButton.addActionListener(e -> cliccaAnnulla());
 
-        add(label, BorderLayout.CENTER);
-        add(panelBottoni, BorderLayout.SOUTH);
+        panel.add(messaggio);
+        panel.add(confermaButton);
 
+        if (!soloOK) {
+            JButton annullaButton = new JButton("Annulla");
+            annullaButton.addActionListener(e -> cliccaAnnulla());
+            panel.add(annullaButton);
+        }
+
+        setContentPane(panel);
         setVisible(true);
     }
 
     public void cliccaConferma() {
-        // conferma()
         if (cancProfController != null) {
             cancProfController.conferma();
             return;
@@ -58,11 +66,13 @@ public class PopupConfermaBoundary extends JFrame {
 
         if (azioneConferma != null) {
             azioneConferma.run();
+            return;
         }
+
+        dispose();
     }
 
     public void cliccaAnnulla() {
-        // annulla()
         if (cancProfController != null) {
             cancProfController.annulla();
             return;
@@ -70,8 +80,9 @@ public class PopupConfermaBoundary extends JFrame {
 
         if (azioneAnnulla != null) {
             azioneAnnulla.run();
-        } else {
-            dispose();
+            return;
         }
+
+        dispose();
     }
 }

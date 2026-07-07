@@ -1,8 +1,8 @@
 package it.afam.is.progetto.afam_app.entity;
 
-import java.time.LocalDateTime; // Importa tutto quello che serve per JPA
+import java.time.LocalDateTime;
 
-import jakarta.persistence.Entity; // Importa le annotazioni di Lombok
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,22 +20,26 @@ import lombok.ToString;
 
 @Entity
 @Table(name = "statistiche_accessi")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class StatisticaAccesso {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class StatisticaAccessoEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private LocalDateTime dataOraAccesso;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "link_condiviso_id", nullable = false)
-    @ToString.Exclude @EqualsAndHashCode.Exclude
-    private LinkCondiviso linkCondiviso;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private LinkCondivisoEntity linkCondiviso;
 
     @PrePersist
-    protected void onCreate() { this.dataOraAccesso = LocalDateTime.now(); }
+    protected void onCreate() {
+        this.dataOraAccesso = LocalDateTime.now();
+    }
 }
-
-
-
-

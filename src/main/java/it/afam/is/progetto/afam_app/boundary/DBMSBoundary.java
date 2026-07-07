@@ -11,15 +11,20 @@ import org.springframework.stereotype.Service;
 
 import it.afam.is.progetto.afam_app.entity.AllegatoEntity;
 import it.afam.is.progetto.afam_app.entity.CodiceOTPEntity;
+import it.afam.is.progetto.afam_app.entity.LinkCondivisoEntity;
 import it.afam.is.progetto.afam_app.entity.PortfolioEntity;
 import it.afam.is.progetto.afam_app.entity.SezioneEntity;
 import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.dto.CredenzialiRegistrazione;
 import it.afam.is.progetto.afam_app.repository.AllegatoRepository;
 import it.afam.is.progetto.afam_app.repository.CodiceOtpRepository;
+import it.afam.is.progetto.afam_app.repository.LinkCondivisoRepository;
 import it.afam.is.progetto.afam_app.repository.PortfolioRepository;
 import it.afam.is.progetto.afam_app.repository.SezioneRepository;
 import it.afam.is.progetto.afam_app.repository.StudenteRepository;
+import it.afam.is.progetto.afam_app.entity.VisibilitaSezioneCandidaturaEntity;
+import it.afam.is.progetto.afam_app.repository.VisibilitaSezioneCandidaturaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DBMSBoundary {
@@ -38,6 +43,12 @@ public class DBMSBoundary {
 
     @Autowired
     private AllegatoRepository allegatoRepository;
+
+    @Autowired
+    private LinkCondivisoRepository linkCondivisoRepository;
+
+    @Autowired
+    private VisibilitaSezioneCandidaturaRepository visibilitaSezioneCandidaturaRepository;
 
     public void inserisciCredenziali(
             String nome,
@@ -78,7 +89,6 @@ public class DBMSBoundary {
     }
 
     public void salvaOTP(CodiceOTPEntity codiceOTP) {
-        // insertOTP(codiceOTP)
         insertOTP(codiceOTP);
     }
 
@@ -91,7 +101,6 @@ public class DBMSBoundary {
     }
 
     public void insertSalvaOTP(CodiceOTPEntity codiceOTP) {
-        // insertOTP(codiceOTP)
         insertOTP(codiceOTP);
     }
 
@@ -161,7 +170,6 @@ public class DBMSBoundary {
     }
 
     public void aggiornaDati(Long studente_id, Map<String, String> dati) {
-        // insertDati(studente_id, dati)
         insertDati(studente_id, dati);
     }
 
@@ -195,7 +203,6 @@ public class DBMSBoundary {
     }
 
     public void cancellaStudente(Long studente_id) {
-        // deleteStudente(studente_id)
         deleteStudente(studente_id);
     }
 
@@ -220,7 +227,6 @@ public class DBMSBoundary {
     }
 
     public void salvaPwd(Long studente_id, String password) {
-        // insertPwd(userID, password)
         insertPwd(studente_id, password);
     }
 
@@ -249,7 +255,6 @@ public class DBMSBoundary {
     }
 
     public void memorizzaDati(StudenteEntity studente) {
-        // insertMemorizzaDati(studente)
         insertMemorizzaDati(studente);
     }
 
@@ -262,7 +267,6 @@ public class DBMSBoundary {
     }
 
     public void creaPortfolio(PortfolioEntity portfolio) {
-        // queryCreazionePortfolio(portfolio)
         queryCreazionePortfolio(portfolio);
     }
 
@@ -275,7 +279,6 @@ public class DBMSBoundary {
     }
 
     public void inserisciSezione(SezioneEntity sezione) {
-        // queryInserimentoSezione(sezione)
         queryInserimentoSezione(sezione);
     }
 
@@ -336,7 +339,6 @@ public class DBMSBoundary {
     }
 
     public void salvaFile(AllegatoEntity allegato) {
-        // insertFile(allegato)
         insertFile(allegato);
     }
 
@@ -361,149 +363,214 @@ public class DBMSBoundary {
     }
 
     public AllegatoEntity recuperaMetadati(Long allegato_id) {
-    if (allegato_id == null) {
-        return null;
+        if (allegato_id == null) {
+            return null;
+        }
+
+        return allegatoRepository.findById(allegato_id).orElse(null);
     }
 
-    return allegatoRepository.findById(allegato_id).orElse(null);
-}
-
-public void aggiornaMetadati(Long allegato_id, String titolo, String descrizione, String autori) {
-    // updateMetadati(titolo, descrizione, autori)
-    updateMetadati(allegato_id, titolo, descrizione, autori);
-}
-
-public void updateMetadati(Long allegato_id, String titolo, String descrizione, String autori) {
-    if (allegato_id == null) {
-        return;
+    public void aggiornaMetadati(Long allegato_id, String titolo, String descrizione, String autori) {
+        updateMetadati(allegato_id, titolo, descrizione, autori);
     }
 
-    allegatoRepository.findById(allegato_id).ifPresent(allegato -> {
-        allegato.setTitoloOpera(titolo);
-        allegato.setDescrizioneBreve(descrizione);
-        allegato.setAutoreOpera(autori);
+    public void updateMetadati(Long allegato_id, String titolo, String descrizione, String autori) {
+        if (allegato_id == null) {
+            return;
+        }
 
-        allegatoRepository.save(allegato);
-    });
-}
+        allegatoRepository.findById(allegato_id).ifPresent(allegato -> {
+            allegato.setTitoloOpera(titolo);
+            allegato.setDescrizioneBreve(descrizione);
+            allegato.setAutoreOpera(autori);
 
-public String recuperaPercorsoAllegato(Long allegato_id) {
-    return queryPercorsoAllegato(allegato_id);
-}
-
-public String queryPercorsoAllegato(Long allegato_id) {
-    if (allegato_id == null) {
-        return null;
+            allegatoRepository.save(allegato);
+        });
     }
 
-    return allegatoRepository.findById(allegato_id)
-            .map(AllegatoEntity::getPercorsoRisorsa)
-            .orElse(null);
-}
-
-public void rimuoviAllegato(Long allegato_id) {
-    // deleteAllegato(allegato_id)
-    deleteAllegato(allegato_id);
-}
-
-public void deleteAllegato(Long allegato_id) {
-    if (allegato_id == null) {
-        return;
+    public String recuperaPercorsoAllegato(Long allegato_id) {
+        return queryPercorsoAllegato(allegato_id);
     }
 
-    allegatoRepository.deleteById(allegato_id);
-}
+    public String queryPercorsoAllegato(Long allegato_id) {
+        if (allegato_id == null) {
+            return null;
+        }
 
-public List<String> recuperaPathAllegatiSezione(Long sezione_id) {
-    return queryPathSezione(sezione_id);
-}
-
-public List<String> queryPathSezione(Long sezione_id) {
-    if (sezione_id == null) {
-        return null;
+        return allegatoRepository.findById(allegato_id)
+                .map(AllegatoEntity::getPercorsoRisorsa)
+                .orElse(null);
     }
 
-    List<AllegatoEntity> allegati = allegatoRepository.findBySezioneId(sezione_id);
-    List<String> pathAllegati = new ArrayList<>();
-
-    for (AllegatoEntity allegato : allegati) {
-        pathAllegati.add(allegato.getPercorsoRisorsa());
+    public void rimuoviAllegato(Long allegato_id) {
+        deleteAllegato(allegato_id);
     }
 
-    return pathAllegati;
-}
+    public void deleteAllegato(Long allegato_id) {
+        if (allegato_id == null) {
+            return;
+        }
 
-public void eliminaSezione(Long idSezione, Long idPortfolio) {
-    // queryEliminaSezione(idSezione, idPortfolio)
-    queryEliminaSezione(idSezione, idPortfolio);
-}
-
-public void queryEliminaSezione(Long idSezione, Long idPortfolio) {
-    if (idSezione == null) {
-        return;
+        allegatoRepository.deleteById(allegato_id);
     }
 
-    sezioneRepository.deleteById(idSezione);
-}
-
-public List<PortfolioEntity> recuperaPortfoliStudente(Long idStudente) {
-    return queryRecuperaPortfoliStudente(idStudente);
-}
-
-public List<PortfolioEntity> queryRecuperaPortfoliStudente(Long studente_id) {
-    if (studente_id == null) {
-        return null;
+    public List<String> recuperaPathAllegatiSezione(Long sezione_id) {
+        return queryPathSezione(sezione_id);
     }
 
-    return portfolioRepository.findByStudenteId(studente_id);
-}
+    public List<String> queryPathSezione(Long sezione_id) {
+        if (sezione_id == null) {
+            return null;
+        }
 
-public List<String> recuperaPathAllegati(Long portfolio_id) {
-    return queryRecuperaPathAllegati(portfolio_id);
-}
-
-public List<String> queryRecuperaPathAllegati(Long portfolio_id) {
-    if (portfolio_id == null) {
-        return null;
-    }
-
-    List<SezioneEntity> sezioni = sezioneRepository.findByPortfolioId(portfolio_id);
-    List<String> pathAllegati = new ArrayList<>();
-
-    for (SezioneEntity sezione : sezioni) {
-        List<AllegatoEntity> allegati = allegatoRepository.findBySezioneId(sezione.getId());
+        List<AllegatoEntity> allegati = allegatoRepository.findBySezioneId(sezione_id);
+        List<String> pathAllegati = new ArrayList<>();
 
         for (AllegatoEntity allegato : allegati) {
             pathAllegati.add(allegato.getPercorsoRisorsa());
         }
+
+        return pathAllegati;
     }
 
-    return pathAllegati;
+    public void eliminaSezione(Long idSezione, Long idPortfolio) {
+        queryEliminaSezione(idSezione, idPortfolio);
+    }
+
+    public void queryEliminaSezione(Long idSezione, Long idPortfolio) {
+        if (idSezione == null) {
+            return;
+        }
+
+        sezioneRepository.deleteById(idSezione);
+    }
+
+    public List<PortfolioEntity> recuperaPortfoliStudente(Long idStudente) {
+        return queryRecuperaPortfoliStudente(idStudente);
+    }
+
+    public List<PortfolioEntity> queryRecuperaPortfoliStudente(Long studente_id) {
+        if (studente_id == null) {
+            return null;
+        }
+
+        return portfolioRepository.findByStudenteId(studente_id);
+    }
+
+    public List<String> recuperaPathAllegati(Long portfolio_id) {
+        return queryRecuperaPathAllegati(portfolio_id);
+    }
+
+    public List<String> queryRecuperaPathAllegati(Long portfolio_id) {
+        if (portfolio_id == null) {
+            return null;
+        }
+
+        List<SezioneEntity> sezioni = sezioneRepository.findByPortfolioId(portfolio_id);
+        List<String> pathAllegati = new ArrayList<>();
+
+        for (SezioneEntity sezione : sezioni) {
+            List<AllegatoEntity> allegati = allegatoRepository.findBySezioneId(sezione.getId());
+
+            for (AllegatoEntity allegato : allegati) {
+                pathAllegati.add(allegato.getPercorsoRisorsa());
+            }
+        }
+
+        return pathAllegati;
+    }
+
+    public void eliminaPortfolio(Long idPortfolio, Long idStudente) {
+        queryEliminaPortfolio(idPortfolio, idStudente);
+    }
+
+    public void queryEliminaPortfolio(Long idPortfolio, Long idStudente) {
+        if (idPortfolio == null || idStudente == null) {
+            return;
+        }
+
+        PortfolioEntity portfolio = portfolioRepository.findById(idPortfolio).orElse(null);
+
+        if (portfolio == null) {
+            return;
+        }
+
+        if (portfolio.getStudente() == null || portfolio.getStudente().getId() == null) {
+            return;
+        }
+
+        if (!portfolio.getStudente().getId().equals(idStudente)) {
+            return;
+        }
+
+        portfolioRepository.delete(portfolio);
+    }
+
+    public boolean verificaToken(String token) {
+        return linkCondivisoRepository.existsByTokenUrl(token);
+    }
+
+    public Long salvaURL(String token, String nomeCond, LocalDateTime dataScadenza, Long portfolio_id) {
+        return insertUrl(token, nomeCond, dataScadenza, portfolio_id);
+    }
+
+    public Long insertUrl(String token, String nomeCond, LocalDateTime dataScadenza, Long portfolio_id) {
+        PortfolioEntity portfolio = recuperaPortfolio(portfolio_id);
+
+        if (portfolio == null) {
+            return null;
+        }
+
+        LinkCondivisoEntity linkCondiviso = LinkCondivisoEntity.builder()
+                .tokenUrl(token)
+                .nomeRiferimento(nomeCond)
+                .dataScadenza(dataScadenza)
+                .portfolio(portfolio)
+                .isAttivo(true)
+                .visiteLink(0)
+                .build();
+
+        LinkCondivisoEntity salvato = linkCondivisoRepository.save(linkCondiviso);
+
+        return salvato.getId();
+    }
+public void aggiornaImpostazioni(Map<Long, Boolean> impostazioni, Long link_condiviso_id) {
+    // updateImpostazioni(impostazioni, link_condiviso_id)
+    updateImpostazioni(impostazioni, link_condiviso_id);
 }
 
-public void eliminaPortfolio(Long idPortfolio, Long idStudente) {
-    queryEliminaPortfolio(idPortfolio, idStudente);
+@Transactional
+public void updateImpostazioni(Map<Long, Boolean> impostazioni, Long link_condiviso_id) {
+    if (impostazioni == null || link_condiviso_id == null) {
+        return;
+    }
+
+    LinkCondivisoEntity linkCondiviso = linkCondivisoRepository.findById(link_condiviso_id).orElse(null);
+
+    if (linkCondiviso == null) {
+        return;
+    }
+
+    // cancella eventuali impostazioni precedenti dello stesso link
+    visibilitaSezioneCandidaturaRepository.deleteByLinkCondivisoId(link_condiviso_id);
+
+    for (Map.Entry<Long, Boolean> entry : impostazioni.entrySet()) {
+        Long sezione_id = entry.getKey();
+        Boolean visibile = entry.getValue();
+
+        SezioneEntity sezione = cercaSezione(sezione_id);
+
+        if (sezione != null) {
+            VisibilitaSezioneCandidaturaEntity visibilita =
+                    VisibilitaSezioneCandidaturaEntity.builder()
+                            .linkCondiviso(linkCondiviso)
+                            .sezione(sezione)
+                            .visibile(Boolean.TRUE.equals(visibile))
+                            .build();
+
+            visibilitaSezioneCandidaturaRepository.save(visibilita);
+        }
+    }
 }
 
-public void queryEliminaPortfolio(Long idPortfolio, Long idStudente) {
-    if (idPortfolio == null || idStudente == null) {
-        return;
-    }
-
-    PortfolioEntity portfolio = portfolioRepository.findById(idPortfolio).orElse(null);
-
-    if (portfolio == null) {
-        return;
-    }
-
-    if (portfolio.getStudente() == null || portfolio.getStudente().getId() == null) {
-        return;
-    }
-
-    if (!portfolio.getStudente().getId().equals(idStudente)) {
-        return;
-    }
-
-    portfolioRepository.delete(portfolio);
-}
 }

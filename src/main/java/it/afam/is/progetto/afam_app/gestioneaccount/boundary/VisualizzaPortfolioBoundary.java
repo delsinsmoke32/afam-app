@@ -40,7 +40,7 @@ public class VisualizzaPortfolioBoundary extends JFrame {
 
     public void mostraPortfolioInit(PortfolioEntity portfolio, List<SezioneEntity> sezioniPortfolio) {
         setTitle("Visualizza Portfolio");
-        setSize(700, 500);
+        setSize(700, 550);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -55,8 +55,12 @@ public class VisualizzaPortfolioBoundary extends JFrame {
         JButton eliminaSezioneButton = new JButton("Elimina sezione");
         eliminaSezioneButton.addActionListener(e -> cliccaEliminaSezione());
 
+        JButton condividiPortfolioButton = new JButton("Condividi portfolio");
+        condividiPortfolioButton.addActionListener(e -> mostraCondivisioneCandidatura());
+
         panel.add(aggiungiSezioneButton);
         panel.add(eliminaSezioneButton);
+        panel.add(condividiPortfolioButton);
 
         panel.add(new JLabel("Sezioni:"));
 
@@ -93,7 +97,7 @@ public class VisualizzaPortfolioBoundary extends JFrame {
 
     private void mostraPortfolioFallback() {
         setTitle("Visualizza Portfolio");
-        setSize(450, 260);
+        setSize(450, 280);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -107,9 +111,13 @@ public class VisualizzaPortfolioBoundary extends JFrame {
         JButton eliminaSezioneButton = new JButton("Elimina sezione");
         eliminaSezioneButton.addActionListener(e -> cliccaEliminaSezione());
 
+        JButton condividiPortfolioButton = new JButton("Condividi portfolio");
+        condividiPortfolioButton.addActionListener(e -> mostraCondivisioneCandidatura());
+
         panel.add(titolo);
         panel.add(aggiungiSezioneButton);
         panel.add(eliminaSezioneButton);
+        panel.add(condividiPortfolioButton);
 
         setContentPane(panel);
         revalidate();
@@ -136,6 +144,13 @@ public class VisualizzaPortfolioBoundary extends JFrame {
                 new CancellaSezioneController(this, dbmsBoundary, fileStorageBoundary);
 
         cancellaSezioneController.avviaCancellazioneSezione(portfolio_id);
+    }
+
+    public void mostraCondivisioneCandidatura() {
+        CondivisioneCandidaturaBoundary condivisioneCandidaturaBoundary =
+                new CondivisioneCandidaturaBoundary(dbmsBoundary, portfolio_id);
+
+        condivisioneCandidaturaBoundary.mostraPaginaCondivisione();
     }
 
     public void mostraPortfolioAggiungiSezione(SezioneEntity sezione) {
