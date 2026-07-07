@@ -42,3 +42,5 @@ public class Licenza {
     public void setDescrizione(String descrizione) { this.descrizione = descrizione; }
 }
 
+
+

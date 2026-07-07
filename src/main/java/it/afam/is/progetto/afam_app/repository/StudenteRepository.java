@@ -21,3 +21,5 @@ public interface StudenteRepository extends JpaRepository<StudenteEntity, Long> 
     Optional<StudenteEntity> findByCodiceFiscale(String codiceFiscale);
 }
 
+
+

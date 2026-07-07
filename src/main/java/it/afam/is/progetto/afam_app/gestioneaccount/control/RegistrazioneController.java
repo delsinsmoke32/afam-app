@@ -89,3 +89,5 @@ public class RegistrazioneController {
         return codiceFiscale != null && codiceFiscale.trim().length() == 16;
     }
 }
+
+

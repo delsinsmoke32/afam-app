@@ -45,7 +45,8 @@ public class Portfolio {
 
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude @EqualsAndHashCode.Exclude
-    private List<Sezione> sezioni;
+    private List<SezioneEntity> sezioni;
 }
+
 
 

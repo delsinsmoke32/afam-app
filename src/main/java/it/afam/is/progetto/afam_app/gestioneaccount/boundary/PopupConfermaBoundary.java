@@ -11,10 +11,18 @@ import it.afam.is.progetto.afam_app.gestioneaccount.control.CancProfController;
 
 public class PopupConfermaBoundary extends JFrame {
 
-    private final CancProfController cancProfController;
+    private CancProfController cancProfController;
+
+    private Runnable azioneConferma;
+    private Runnable azioneAnnulla;
 
     public PopupConfermaBoundary(CancProfController cancProfController) {
         this.cancProfController = cancProfController;
+    }
+
+    public PopupConfermaBoundary(Runnable azioneConferma, Runnable azioneAnnulla) {
+        this.azioneConferma = azioneConferma;
+        this.azioneAnnulla = azioneAnnulla;
     }
 
     public void mostraPopup(String testo) {
@@ -33,7 +41,6 @@ public class PopupConfermaBoundary extends JFrame {
         panelBottoni.add(annullaButton);
 
         confermaButton.addActionListener(e -> cliccaConferma());
-
         annullaButton.addActionListener(e -> cliccaAnnulla());
 
         add(label, BorderLayout.CENTER);
@@ -44,12 +51,27 @@ public class PopupConfermaBoundary extends JFrame {
 
     public void cliccaConferma() {
         // conferma()
-        cancProfController.conferma();
+        if (cancProfController != null) {
+            cancProfController.conferma();
+            return;
+        }
+
+        if (azioneConferma != null) {
+            azioneConferma.run();
+        }
     }
 
     public void cliccaAnnulla() {
         // annulla()
-        cancProfController.annulla();
+        if (cancProfController != null) {
+            cancProfController.annulla();
+            return;
+        }
+
+        if (azioneAnnulla != null) {
+            azioneAnnulla.run();
+        } else {
+            dispose();
+        }
     }
 }
-

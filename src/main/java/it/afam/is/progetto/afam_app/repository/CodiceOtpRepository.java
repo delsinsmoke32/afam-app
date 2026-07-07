@@ -20,3 +20,5 @@ public interface CodiceOtpRepository extends JpaRepository<CodiceOTPEntity, Long
 
     void deleteByStudenteId(Long studenteId);
 }
+
+

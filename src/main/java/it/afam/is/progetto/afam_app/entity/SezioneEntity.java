@@ -1,7 +1,8 @@
 package it.afam.is.progetto.afam_app.entity;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,28 +21,40 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
-@Table(name = "codici_otp")
+@Table(name = "sezioni")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CodiceOTPEntity {
+public class SezioneEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 6)
-    private String codice;
+    @Column(nullable = false, length = 200)
+    private String titolo;
 
-    @Column(nullable = false)
-    private LocalDateTime scadenza;
+    @Column(columnDefinition = "TEXT")
+    private String corpoTesto;
+
+    @Builder.Default
+    private Boolean isPubblica = true;
+
+    @Builder.Default
+    private Boolean watermarkAttivo = false;
+
+    @Builder.Default
+    private Integer ordineVisualizzazione = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "studente_id", nullable = false)
+    @JoinColumn(name = "portfolio_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private StudenteEntity studente;
+    private PortfolioEntity portfolio;
+
+    @OneToMany(mappedBy = "sezione", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<AllegatoEntity> allegati;
 }
-
-

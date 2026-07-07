@@ -59,9 +59,11 @@ public class StudenteEntity {
 
     private String linkPersonale;
 
-    @OneToMany(mappedBy = "StudenteEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "studente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<Portfolio> portfoli;
+    private List<PortfolioEntity> portfoli;
 }
+
+
 

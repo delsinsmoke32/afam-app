@@ -37,6 +37,8 @@ public class LinkCondiviso {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "portfolio_id", nullable = false)
     @ToString.Exclude @EqualsAndHashCode.Exclude
-    private Portfolio portfolio;
+    private PortfolioEntity PortfolioEntity;
 }
+
+
 

@@ -125,3 +125,4 @@ public class LoginController {
         return String.format("%06d", codice);
     }
 }
+

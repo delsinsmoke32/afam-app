@@ -34,7 +34,7 @@ public class PaginaPersonaleBoundary extends JFrame {
         JLabel titolo = new JLabel("Benvenuto: " + StudenteEntity.getEmail());
 
         JButton gestioneProfiloButton = new JButton("Gestione profilo");
-        JButton gestionePortfolioButton = new JButton("Gestione portfolio");
+        JButton gestionePortfolioButton = new JButton("Gestione PortfolioEntity");
         JButton logoutButton = new JButton("Logout");
 
         panel.add(titolo);
@@ -51,7 +51,7 @@ public class PaginaPersonaleBoundary extends JFrame {
 
         gestionePortfolioButton.addActionListener(e -> {
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
-            popupErroreBoundary.mostraPopup("Gestione portfolio non ancora implementata.");
+            popupErroreBoundary.mostraPopup("Gestione PortfolioEntity non ancora implementata.");
         });
 
         logoutButton.addActionListener(e -> {
@@ -67,4 +67,6 @@ public class PaginaPersonaleBoundary extends JFrame {
         setVisible(true);
     }
 }
+
+
 

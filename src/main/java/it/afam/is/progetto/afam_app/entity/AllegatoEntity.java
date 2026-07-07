@@ -1,8 +1,8 @@
 package it.afam.is.progetto.afam_app.entity;
 
-import java.time.LocalDate; // Importa tutto quello che serve per JPA
+import java.time.LocalDate;
 
-import jakarta.persistence.Column; // Importa le annotazioni di Lombok
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -20,14 +20,19 @@ import lombok.ToString;
 
 @Entity
 @Table(name = "allegati")
-@Data @NoArgsConstructor @AllArgsConstructor @Builder
-public class Allegato {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class AllegatoEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
     private String nomeFile;
-    
+
     @Column(nullable = false, length = 200)
     private String titoloOpera;
 
@@ -38,13 +43,15 @@ public class Allegato {
     private String autoreOpera;
 
     private String tipoFile;
+
     @Column(nullable = false, length = 500)
     private String percorsoRisorsa;
+
     private LocalDate dataCreazione;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sezione_id", nullable = false)
-    @ToString.Exclude @EqualsAndHashCode.Exclude
-    private Sezione sezione;
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private SezioneEntity sezione;
 }
-

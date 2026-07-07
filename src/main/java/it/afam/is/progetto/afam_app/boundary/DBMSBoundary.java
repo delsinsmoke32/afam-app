@@ -1,16 +1,23 @@
 package it.afam.is.progetto.afam_app.boundary;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import it.afam.is.progetto.afam_app.entity.AllegatoEntity;
 import it.afam.is.progetto.afam_app.entity.CodiceOTPEntity;
+import it.afam.is.progetto.afam_app.entity.PortfolioEntity;
+import it.afam.is.progetto.afam_app.entity.SezioneEntity;
 import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.dto.CredenzialiRegistrazione;
+import it.afam.is.progetto.afam_app.repository.AllegatoRepository;
 import it.afam.is.progetto.afam_app.repository.CodiceOtpRepository;
+import it.afam.is.progetto.afam_app.repository.PortfolioRepository;
+import it.afam.is.progetto.afam_app.repository.SezioneRepository;
 import it.afam.is.progetto.afam_app.repository.StudenteRepository;
 
 @Service
@@ -21,6 +28,15 @@ public class DBMSBoundary {
 
     @Autowired
     private CodiceOtpRepository codiceOtpRepository;
+
+    @Autowired
+    private PortfolioRepository portfolioRepository;
+
+    @Autowired
+    private SezioneRepository sezioneRepository;
+
+    @Autowired
+    private AllegatoRepository allegatoRepository;
 
     public void inserisciCredenziali(
             String nome,
@@ -243,4 +259,130 @@ public class DBMSBoundary {
 
         studenteRepository.save(studente);
     }
+
+    public void creaPortfolio(PortfolioEntity portfolio) {
+        // queryCreazionePortfolio(portfolio)
+        queryCreazionePortfolio(portfolio);
+    }
+
+    public void queryCreazionePortfolio(PortfolioEntity portfolio) {
+        if (portfolio == null) {
+            return;
+        }
+
+        portfolioRepository.save(portfolio);
+    }
+
+    public void inserisciSezione(SezioneEntity sezione) {
+        // queryInserimentoSezione(sezione)
+        queryInserimentoSezione(sezione);
+    }
+
+    public void queryInserimentoSezione(SezioneEntity sezione) {
+        if (sezione == null) {
+            return;
+        }
+
+        sezioneRepository.save(sezione);
+    }
+
+    public PortfolioEntity cercaPortfolio(Long portfolio_id) {
+        if (portfolio_id == null) {
+            return null;
+        }
+
+        return portfolioRepository.findById(portfolio_id).orElse(null);
+    }
+
+    public List<PortfolioEntity> recuperaListaPortfoli(Long studente_id) {
+        return queryListaPortfoli(studente_id);
+    }
+
+    public List<PortfolioEntity> queryListaPortfoli(Long studente_id) {
+        if (studente_id == null) {
+            return null;
+        }
+
+        return portfolioRepository.findByStudenteId(studente_id);
+    }
+
+    public PortfolioEntity recuperaPortfolio(Long portfolio_id) {
+        if (portfolio_id == null) {
+            return null;
+        }
+
+        return portfolioRepository.findById(portfolio_id).orElse(null);
+    }
+
+    public List<SezioneEntity> recuperaSezioniPortfolio(Long portfolio_id) {
+        return queryRecuperaSezioniPortfolio(portfolio_id);
+    }
+
+    public List<SezioneEntity> queryRecuperaSezioniPortfolio(Long portfolio_id) {
+        if (portfolio_id == null) {
+            return null;
+        }
+
+        return sezioneRepository.findByPortfolioId(portfolio_id);
+    }
+
+    public SezioneEntity cercaSezione(Long sezione_id) {
+        if (sezione_id == null) {
+            return null;
+        }
+
+        return sezioneRepository.findById(sezione_id).orElse(null);
+    }
+
+    public void salvaFile(AllegatoEntity allegato) {
+        // insertFile(allegato)
+        insertFile(allegato);
+    }
+
+    public void insertFile(AllegatoEntity allegato) {
+        if (allegato == null) {
+            return;
+        }
+
+        allegatoRepository.save(allegato);
+    }
+
+    public List<AllegatoEntity> recuperaAllegati(Long sezione_id) {
+        return queryAllegati(sezione_id);
+    }
+
+    public List<AllegatoEntity> queryAllegati(Long sezione_id) {
+        if (sezione_id == null) {
+            return null;
+        }
+
+        return allegatoRepository.findBySezioneId(sezione_id);
+    }
+
+    public AllegatoEntity recuperaMetadati(Long allegato_id) {
+    if (allegato_id == null) {
+        return null;
+    }
+
+    return allegatoRepository.findById(allegato_id).orElse(null);
+}
+
+public void aggiornaMetadati(Long allegato_id, String titolo, String descrizione, String autori) {
+    // updateMetadati(titolo, descrizione, autori)
+    updateMetadati(allegato_id, titolo, descrizione, autori);
+}
+
+public void updateMetadati(Long allegato_id, String titolo, String descrizione, String autori) {
+    if (allegato_id == null) {
+        return;
+    }
+
+    allegatoRepository.findById(allegato_id).ifPresent(allegato -> {
+        allegato.setTitoloOpera(titolo);
+        allegato.setDescrizioneBreve(descrizione);
+        allegato.setAutoreOpera(autori);
+
+        allegatoRepository.save(allegato);
+    });
+}
 }

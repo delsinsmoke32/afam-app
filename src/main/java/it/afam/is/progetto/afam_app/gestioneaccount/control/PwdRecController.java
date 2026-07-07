@@ -169,3 +169,4 @@ public class PwdRecController {
         return password.equals(conf_password) && !password.trim().isEmpty();
     }
 }
+
