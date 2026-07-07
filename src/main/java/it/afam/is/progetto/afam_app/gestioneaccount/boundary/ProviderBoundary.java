@@ -3,6 +3,8 @@ package it.afam.is.progetto.afam_app.gestioneaccount.boundary;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
 public class ProviderBoundary {
 
     public Map<String, String> reindirizzaAProvider(String provider_id) {
@@ -18,6 +20,24 @@ public class ProviderBoundary {
 
         Map<String, String> attestazione = new HashMap<>();
 
+        if (provider_id == null || provider_id.trim().isEmpty()) {
+            attestazione.put("valid", "false");
+            return attestazione;
+        }
+
+        int scelta = JOptionPane.showConfirmDialog(
+                null,
+                "Simulare attestazione SPID/eIDAS valida per provider: " + provider_id + "?",
+                "Identity Provider Esterno",
+                JOptionPane.YES_NO_OPTION
+        );
+
+        if (scelta != JOptionPane.YES_OPTION) {
+            attestazione.put("valid", "false");
+            attestazione.put("provider", provider_id);
+            return attestazione;
+        }
+
         attestazione.put("valid", "true");
         attestazione.put("provider", provider_id);
 
@@ -29,6 +49,3 @@ public class ProviderBoundary {
         return attestazione;
     }
 }
-
-
-

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -60,6 +61,21 @@ public class FileStorageBoundary {
             }
         } catch (IOException e) {
             System.out.println("Errore eliminazione file: " + e.getMessage());
+        }
+    }
+
+    public void eliminaFileMultipli(List<String> pathAllegati) {
+        // deleteFiles(pathAllegati)
+        deleteFiles(pathAllegati);
+    }
+
+    public void deleteFiles(List<String> pathAllegati) {
+        if (pathAllegati == null || pathAllegati.isEmpty()) {
+            return;
+        }
+
+        for (String pathAllegato : pathAllegati) {
+            deleteFile(pathAllegato);
         }
     }
 }

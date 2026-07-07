@@ -1,6 +1,7 @@
 package it.afam.is.progetto.afam_app.boundary;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -411,5 +412,98 @@ public void deleteAllegato(Long allegato_id) {
     }
 
     allegatoRepository.deleteById(allegato_id);
+}
+
+public List<String> recuperaPathAllegatiSezione(Long sezione_id) {
+    return queryPathSezione(sezione_id);
+}
+
+public List<String> queryPathSezione(Long sezione_id) {
+    if (sezione_id == null) {
+        return null;
+    }
+
+    List<AllegatoEntity> allegati = allegatoRepository.findBySezioneId(sezione_id);
+    List<String> pathAllegati = new ArrayList<>();
+
+    for (AllegatoEntity allegato : allegati) {
+        pathAllegati.add(allegato.getPercorsoRisorsa());
+    }
+
+    return pathAllegati;
+}
+
+public void eliminaSezione(Long idSezione, Long idPortfolio) {
+    // queryEliminaSezione(idSezione, idPortfolio)
+    queryEliminaSezione(idSezione, idPortfolio);
+}
+
+public void queryEliminaSezione(Long idSezione, Long idPortfolio) {
+    if (idSezione == null) {
+        return;
+    }
+
+    sezioneRepository.deleteById(idSezione);
+}
+
+public List<PortfolioEntity> recuperaPortfoliStudente(Long idStudente) {
+    return queryRecuperaPortfoliStudente(idStudente);
+}
+
+public List<PortfolioEntity> queryRecuperaPortfoliStudente(Long studente_id) {
+    if (studente_id == null) {
+        return null;
+    }
+
+    return portfolioRepository.findByStudenteId(studente_id);
+}
+
+public List<String> recuperaPathAllegati(Long portfolio_id) {
+    return queryRecuperaPathAllegati(portfolio_id);
+}
+
+public List<String> queryRecuperaPathAllegati(Long portfolio_id) {
+    if (portfolio_id == null) {
+        return null;
+    }
+
+    List<SezioneEntity> sezioni = sezioneRepository.findByPortfolioId(portfolio_id);
+    List<String> pathAllegati = new ArrayList<>();
+
+    for (SezioneEntity sezione : sezioni) {
+        List<AllegatoEntity> allegati = allegatoRepository.findBySezioneId(sezione.getId());
+
+        for (AllegatoEntity allegato : allegati) {
+            pathAllegati.add(allegato.getPercorsoRisorsa());
+        }
+    }
+
+    return pathAllegati;
+}
+
+public void eliminaPortfolio(Long idPortfolio, Long idStudente) {
+    queryEliminaPortfolio(idPortfolio, idStudente);
+}
+
+public void queryEliminaPortfolio(Long idPortfolio, Long idStudente) {
+    if (idPortfolio == null || idStudente == null) {
+        return;
+    }
+
+    PortfolioEntity portfolio = portfolioRepository.findById(idPortfolio).orElse(null);
+
+    if (portfolio == null) {
+        return;
+    }
+
+    if (portfolio.getStudente() == null || portfolio.getStudente().getId() == null) {
+        return;
+    }
+
+    if (!portfolio.getStudente().getId().equals(idStudente)) {
+        return;
+    }
+
+    portfolioRepository.delete(portfolio);
 }
 }

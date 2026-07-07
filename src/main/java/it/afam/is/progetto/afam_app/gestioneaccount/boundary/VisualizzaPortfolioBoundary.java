@@ -12,6 +12,7 @@ import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.boundary.FileStorageBoundary;
 import it.afam.is.progetto.afam_app.entity.PortfolioEntity;
 import it.afam.is.progetto.afam_app.entity.SezioneEntity;
+import it.afam.is.progetto.afam_app.gestioneaccount.control.CancellaSezioneController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.InserimentoSezioneController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.VisualizzaSezioneController;
 
@@ -39,7 +40,7 @@ public class VisualizzaPortfolioBoundary extends JFrame {
 
     public void mostraPortfolioInit(PortfolioEntity portfolio, List<SezioneEntity> sezioniPortfolio) {
         setTitle("Visualizza Portfolio");
-        setSize(650, 450);
+        setSize(700, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -51,7 +52,11 @@ public class VisualizzaPortfolioBoundary extends JFrame {
         JButton aggiungiSezioneButton = new JButton("Aggiungi nuova sezione");
         aggiungiSezioneButton.addActionListener(e -> selezionaInserisciNuovaSezione());
 
+        JButton eliminaSezioneButton = new JButton("Elimina sezione");
+        eliminaSezioneButton.addActionListener(e -> cliccaEliminaSezione());
+
         panel.add(aggiungiSezioneButton);
+        panel.add(eliminaSezioneButton);
 
         panel.add(new JLabel("Sezioni:"));
 
@@ -60,57 +65,84 @@ public class VisualizzaPortfolioBoundary extends JFrame {
         } else {
             for (SezioneEntity sezione : sezioniPortfolio) {
                 JButton sezioneButton = new JButton(sezione.getTitolo());
-
-                // cliccaVisualizzaSezione()
                 sezioneButton.addActionListener(e -> cliccaVisualizzaSezione(sezione.getId()));
-
                 panel.add(sezioneButton);
             }
         }
 
         setContentPane(panel);
+        revalidate();
+        repaint();
         setVisible(true);
     }
 
     public void mostraPortfolio() {
+        ricaricaPortfolio();
+    }
+
+    public void ricaricaPortfolio() {
+        PortfolioEntity portfolio = dbmsBoundary.recuperaPortfolio(portfolio_id);
+        List<SezioneEntity> sezioniPortfolio = dbmsBoundary.recuperaSezioniPortfolio(portfolio_id);
+
+        if (portfolio != null) {
+            mostraPortfolioInit(portfolio, sezioniPortfolio);
+        } else {
+            mostraPortfolioFallback();
+        }
+    }
+
+    private void mostraPortfolioFallback() {
         setTitle("Visualizza Portfolio");
-        setSize(450, 220);
+        setSize(450, 260);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel(new GridLayout(0, 1));
 
         JLabel titolo = new JLabel("Visualizza Portfolio");
-        JButton aggiungiSezioneButton = new JButton("Aggiungi sezione");
 
+        JButton aggiungiSezioneButton = new JButton("Aggiungi sezione");
         aggiungiSezioneButton.addActionListener(e -> selezionaInserisciNuovaSezione());
+
+        JButton eliminaSezioneButton = new JButton("Elimina sezione");
+        eliminaSezioneButton.addActionListener(e -> cliccaEliminaSezione());
 
         panel.add(titolo);
         panel.add(aggiungiSezioneButton);
+        panel.add(eliminaSezioneButton);
 
         setContentPane(panel);
+        revalidate();
+        repaint();
         setVisible(true);
     }
 
     public void selezionaInserisciNuovaSezione() {
-        // <<create>> InserimentoSezioneController
         InserimentoSezioneController inserimentoSezioneController =
                 new InserimentoSezioneController(this, dbmsBoundary);
 
-        // avviaInserimentoSezione(portfolio_id)
         inserimentoSezioneController.avviaInserimentoSezione(portfolio_id);
     }
 
     public void cliccaVisualizzaSezione(Long sezione_id) {
-        // <<create>> VisualizzaSezioneController
         VisualizzaSezioneController visualizzaSezioneController =
                 new VisualizzaSezioneController(this, dbmsBoundary, fileStorageBoundary);
 
-        // richiediVisualizzazione(sezione_id)
         visualizzaSezioneController.richiediVisualizzazione(sezione_id);
     }
 
+    public void cliccaEliminaSezione() {
+        CancellaSezioneController cancellaSezioneController =
+                new CancellaSezioneController(this, dbmsBoundary, fileStorageBoundary);
+
+        cancellaSezioneController.avviaCancellazioneSezione(portfolio_id);
+    }
+
     public void mostraPortfolioAggiungiSezione(SezioneEntity sezione) {
-        mostraPortfolio();
+        ricaricaPortfolio();
+    }
+
+    public void mostraPortfolioRimuoviSezione(Long sezione_id) {
+        ricaricaPortfolio();
     }
 }

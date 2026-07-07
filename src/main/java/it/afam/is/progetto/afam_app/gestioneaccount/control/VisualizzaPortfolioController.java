@@ -4,10 +4,9 @@ import java.util.List;
 
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.entity.PortfolioEntity;
-import it.afam.is.progetto.afam_app.entity.Sessione;
 import it.afam.is.progetto.afam_app.entity.SezioneEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.GestionePortfolioBoundary;
-import it.afam.is.progetto.afam_app.gestioneaccount.boundary.ListaPortfoliBoundary;
+import it.afam.is.progetto.afam_app.gestioneaccount.boundary.ListaPortfolioBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.PopupErroreBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.VisualizzaPortfolioBoundary;
 
@@ -16,7 +15,7 @@ public class VisualizzaPortfolioController {
     private final GestionePortfolioBoundary gestionePortfolioBoundary;
     private final DBMSBoundary dbmsBoundary;
 
-    private ListaPortfoliBoundary listaPortfoliBoundary;
+    private ListaPortfolioBoundary listaPortfolioBoundary;
 
     public VisualizzaPortfolioController(
             GestionePortfolioBoundary gestionePortfolioBoundary,
@@ -24,29 +23,21 @@ public class VisualizzaPortfolioController {
     ) {
         this.gestionePortfolioBoundary = gestionePortfolioBoundary;
         this.dbmsBoundary = dbmsBoundary;
+    }
 
-        Long studente_id = Sessione.getStudenteId();
-
-        // recuperaListaPortfoli(studente_id)
+    public void recuperaListaPortfoli(Long studente_id) {
         List<PortfolioEntity> listaPortfoli = dbmsBoundary.recuperaListaPortfoli(studente_id);
 
-        // alt [listaPortfoli != null]
         if (listaPortfoli != null && !listaPortfoli.isEmpty()) {
-            // <<create>> ListaPortfoliBoundary
-            listaPortfoliBoundary = new ListaPortfoliBoundary(this);
+            // <<create>> ListaPortfolioBoundary
+            listaPortfolioBoundary = new ListaPortfolioBoundary(this);
 
             // mostraListaPortfoli(listaPortfoli)
-            listaPortfoliBoundary.mostraListaPortfoli(listaPortfoli);
+            listaPortfolioBoundary.mostraListaPortfoli(listaPortfoli);
         } else {
-            // [else]
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
-
-            // mostraPopup(testo)
             popupErroreBoundary.mostraPopup("Nessun portfolio trovato.");
 
-            // cliccaOK() gestito dal popup
-
-            // mostraGestionePortfolio()
             gestionePortfolioBoundary.mostraGestionePortfolio();
         }
     }
@@ -54,28 +45,17 @@ public class VisualizzaPortfolioController {
     public void recuperaPortfolio(Long portfolio_id) {
         PortfolioEntity portfolio = dbmsBoundary.recuperaPortfolio(portfolio_id);
 
-        if (listaPortfoliBoundary != null) {
-            // <<destroy>> ListaPortfoliBoundary
-            listaPortfoliBoundary.dispose();
-            listaPortfoliBoundary = null;
+        if (listaPortfolioBoundary != null) {
+            // <<destroy>> ListaPortfolioBoundary
+            listaPortfolioBoundary.dispose();
+            listaPortfolioBoundary = null;
         }
 
-        if (portfolio == null) {
-            PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
-            popupErroreBoundary.mostraPopup("Portfolio non trovato.");
-
-            gestionePortfolioBoundary.mostraGestionePortfolio();
-            return;
-        }
-
-        // recuperaSezioniPortfolio(portfolio_id)
         List<SezioneEntity> sezioniPortfolio = dbmsBoundary.recuperaSezioniPortfolio(portfolio_id);
 
-        // <<create>> VisualizzaPortfolioBoundary
         VisualizzaPortfolioBoundary visualizzaPortfolioBoundary =
                 new VisualizzaPortfolioBoundary(dbmsBoundary, portfolio_id);
 
-        // mostraPortfolioInit(portfolio, sezioniPortfolio)
         visualizzaPortfolioBoundary.mostraPortfolioInit(portfolio, sezioniPortfolio);
     }
 }
