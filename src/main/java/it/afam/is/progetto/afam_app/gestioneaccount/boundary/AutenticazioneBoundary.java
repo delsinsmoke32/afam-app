@@ -34,7 +34,7 @@ public class AutenticazioneBoundary extends JFrame {
 
     public void mostraPaginaAuth() {
         setTitle("AFAM - Autenticazione");
-        setSize(400, 300);
+        setSize(400, 360);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -42,13 +42,15 @@ public class AutenticazioneBoundary extends JFrame {
         JButton registrazioneButton = new JButton("Registrazione");
         JButton recuperaPasswordButton = new JButton("Recupera Password");
         JButton spidButton = new JButton("Entra con SPID/eIDAS");
+        JButton apriUrlCondivisoButton = new JButton("Apri URL condiviso");
 
-        JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
 
         panel.add(loginButton);
         panel.add(registrazioneButton);
         panel.add(recuperaPasswordButton);
         panel.add(spidButton);
+        panel.add(apriUrlCondivisoButton);
 
         loginButton.addActionListener(e -> CliccaLogin());
 
@@ -58,7 +60,11 @@ public class AutenticazioneBoundary extends JFrame {
 
         spidButton.addActionListener(e -> CliccaEntraSPID());
 
+        apriUrlCondivisoButton.addActionListener(e -> cliccaApriURLCondiviso());
+
         setContentPane(panel);
+        revalidate();
+        repaint();
         setVisible(true);
     }
 
@@ -80,6 +86,14 @@ public class AutenticazioneBoundary extends JFrame {
         new SPIDController(this, dbmsBoundary);
     }
 
+    public void cliccaApriURLCondiviso() {
+        // <<create>> HomepageBoundary
+        HomepageBoundary homepageBoundary = new HomepageBoundary(dbmsBoundary);
+
+        // mostraHomepage()
+        homepageBoundary.mostraHomepage();
+    }
+
     public void mostraAutenticazione() {
         mostraPaginaAuth();
     }
@@ -88,6 +102,3 @@ public class AutenticazioneBoundary extends JFrame {
         mostraPaginaAuth();
     }
 }
-
-
-

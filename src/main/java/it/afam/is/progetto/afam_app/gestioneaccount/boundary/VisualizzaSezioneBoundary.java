@@ -13,6 +13,7 @@ import it.afam.is.progetto.afam_app.boundary.FileStorageBoundary;
 import it.afam.is.progetto.afam_app.entity.AllegatoEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.CancellazioneFileController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.GestioneAllegatiController;
+import it.afam.is.progetto.afam_app.gestioneaccount.control.ModificaDescrizioneController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.ModificaMetadatiController;
 
 public class VisualizzaSezioneBoundary extends JFrame {
@@ -33,7 +34,7 @@ public class VisualizzaSezioneBoundary extends JFrame {
 
     public void mostraSezioneInit(List<AllegatoEntity> listaAllegati) {
         setTitle("Visualizza Sezione");
-        setSize(700, 500);
+        setSize(700, 560);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -41,9 +42,16 @@ public class VisualizzaSezioneBoundary extends JFrame {
 
         panel.add(new JLabel("Visualizza Sezione"));
 
+        String descrizione = dbmsBoundary.recuperaDescrizioneSezione(sezione_id);
+        panel.add(new JLabel("Descrizione: " + (descrizione != null ? descrizione : "")));
+
+        JButton modificaDescrizioneButton = new JButton("Modifica descrizione");
+        modificaDescrizioneButton.addActionListener(e -> cliccaModificaDescrizione());
+
         JButton uploadButton = new JButton("Upload file");
         uploadButton.addActionListener(e -> cliccaUploadFile());
 
+        panel.add(modificaDescrizioneButton);
         panel.add(uploadButton);
 
         panel.add(new JLabel("Allegati:"));
@@ -60,8 +68,6 @@ public class VisualizzaSezioneBoundary extends JFrame {
                 modificaButton.addActionListener(e -> cliccaModificaMetadati(allegato.getId()));
 
                 JButton eliminaButton = new JButton("Elimina file");
-
-                // cliccaEliminaFile()
                 eliminaButton.addActionListener(e -> cliccaEliminaFile(allegato.getId()));
 
                 panel.add(allegatoLabel);
@@ -71,27 +77,14 @@ public class VisualizzaSezioneBoundary extends JFrame {
         }
 
         setContentPane(panel);
+        revalidate();
+        repaint();
         setVisible(true);
     }
 
     public void mostraSezione() {
-        setTitle("Visualizza Sezione");
-        setSize(450, 220);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
-        JPanel panel = new JPanel();
-
-        JLabel titolo = new JLabel("Visualizza Sezione");
-        JButton uploadButton = new JButton("Upload file");
-
-        uploadButton.addActionListener(e -> cliccaUploadFile());
-
-        panel.add(titolo);
-        panel.add(uploadButton);
-
-        setContentPane(panel);
-        setVisible(true);
+        List<AllegatoEntity> listaAllegati = dbmsBoundary.recuperaAllegati(sezione_id);
+        mostraSezioneInit(listaAllegati);
     }
 
     public void cliccaUploadFile() {
@@ -101,6 +94,15 @@ public class VisualizzaSezioneBoundary extends JFrame {
 
         // richiediUpload(sezione_id)
         gestioneAllegatiController.richiediUpload(sezione_id);
+    }
+
+    public void cliccaModificaDescrizione() {
+        // <<create>> ModificaDescrizioneController
+        ModificaDescrizioneController modificaDescrizioneController =
+                new ModificaDescrizioneController(this, dbmsBoundary);
+
+        // richiediModificaDescrizione(sezione_id)
+        modificaDescrizioneController.richiediModificaDescrizione(sezione_id);
     }
 
     public void cliccaModificaMetadati(Long allegato_id) {

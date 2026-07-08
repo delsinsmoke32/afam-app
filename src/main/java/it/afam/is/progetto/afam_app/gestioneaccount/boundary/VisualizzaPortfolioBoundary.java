@@ -1,6 +1,7 @@
 package it.afam.is.progetto.afam_app.gestioneaccount.boundary;
 
 import java.awt.GridLayout;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -13,7 +14,10 @@ import it.afam.is.progetto.afam_app.boundary.FileStorageBoundary;
 import it.afam.is.progetto.afam_app.entity.PortfolioEntity;
 import it.afam.is.progetto.afam_app.entity.SezioneEntity;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.CancellaSezioneController;
+import it.afam.is.progetto.afam_app.gestioneaccount.control.GestioneLicenzaController;
+import it.afam.is.progetto.afam_app.gestioneaccount.control.GestioneVisibilitaPortController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.InserimentoSezioneController;
+import it.afam.is.progetto.afam_app.gestioneaccount.control.OrdinamentoSezioniController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.VisualizzaSezioneController;
 
 public class VisualizzaPortfolioBoundary extends JFrame {
@@ -40,7 +44,7 @@ public class VisualizzaPortfolioBoundary extends JFrame {
 
     public void mostraPortfolioInit(PortfolioEntity portfolio, List<SezioneEntity> sezioniPortfolio) {
         setTitle("Visualizza Portfolio");
-        setSize(700, 550);
+        setSize(700, 700);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -58,17 +62,37 @@ public class VisualizzaPortfolioBoundary extends JFrame {
         JButton condividiPortfolioButton = new JButton("Condividi portfolio");
         condividiPortfolioButton.addActionListener(e -> mostraCondivisioneCandidatura());
 
+        JButton gestioneLicenzeButton = new JButton("Gestione licenze");
+        gestioneLicenzeButton.addActionListener(e -> cliccaGestioneLicenze());
+
+        JButton gestioneVisibilitaSezioniButton = new JButton("Gestione visibilità sezioni");
+        gestioneVisibilitaSezioniButton.addActionListener(e -> cliccaGestioneVisibilitaSezioni());
+
+        JButton ordinamentoSezioniButton = new JButton("Ordinamento sezioni");
+        ordinamentoSezioniButton.addActionListener(e -> selezionaOrdinamentoSezioni());
+
         panel.add(aggiungiSezioneButton);
         panel.add(eliminaSezioneButton);
         panel.add(condividiPortfolioButton);
+        panel.add(gestioneLicenzeButton);
+        panel.add(gestioneVisibilitaSezioniButton);
+        panel.add(ordinamentoSezioniButton);
 
         panel.add(new JLabel("Sezioni:"));
 
         if (sezioniPortfolio == null || sezioniPortfolio.isEmpty()) {
             panel.add(new JLabel("Nessuna sezione presente."));
         } else {
+            sezioniPortfolio.sort(Comparator.comparing(
+                    sezione -> sezione.getOrdineVisualizzazione() != null
+                            ? sezione.getOrdineVisualizzazione()
+                            : 0
+            ));
+
             for (SezioneEntity sezione : sezioniPortfolio) {
-                JButton sezioneButton = new JButton(sezione.getTitolo());
+                String stato = Boolean.TRUE.equals(sezione.getIsPubblica()) ? "pubblica" : "non pubblica";
+
+                JButton sezioneButton = new JButton(sezione.getTitolo() + " (" + stato + ")");
                 sezioneButton.addActionListener(e -> cliccaVisualizzaSezione(sezione.getId()));
                 panel.add(sezioneButton);
             }
@@ -84,6 +108,10 @@ public class VisualizzaPortfolioBoundary extends JFrame {
         ricaricaPortfolio();
     }
 
+    public void mostraPaginaCondivisione() {
+        mostraPortfolio();
+    }
+
     public void ricaricaPortfolio() {
         PortfolioEntity portfolio = dbmsBoundary.recuperaPortfolio(portfolio_id);
         List<SezioneEntity> sezioniPortfolio = dbmsBoundary.recuperaSezioniPortfolio(portfolio_id);
@@ -97,7 +125,7 @@ public class VisualizzaPortfolioBoundary extends JFrame {
 
     private void mostraPortfolioFallback() {
         setTitle("Visualizza Portfolio");
-        setSize(450, 280);
+        setSize(450, 430);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -114,10 +142,22 @@ public class VisualizzaPortfolioBoundary extends JFrame {
         JButton condividiPortfolioButton = new JButton("Condividi portfolio");
         condividiPortfolioButton.addActionListener(e -> mostraCondivisioneCandidatura());
 
+        JButton gestioneLicenzeButton = new JButton("Gestione licenze");
+        gestioneLicenzeButton.addActionListener(e -> cliccaGestioneLicenze());
+
+        JButton gestioneVisibilitaSezioniButton = new JButton("Gestione visibilità sezioni");
+        gestioneVisibilitaSezioniButton.addActionListener(e -> cliccaGestioneVisibilitaSezioni());
+
+        JButton ordinamentoSezioniButton = new JButton("Ordinamento sezioni");
+        ordinamentoSezioniButton.addActionListener(e -> selezionaOrdinamentoSezioni());
+
         panel.add(titolo);
         panel.add(aggiungiSezioneButton);
         panel.add(eliminaSezioneButton);
         panel.add(condividiPortfolioButton);
+        panel.add(gestioneLicenzeButton);
+        panel.add(gestioneVisibilitaSezioniButton);
+        panel.add(ordinamentoSezioniButton);
 
         setContentPane(panel);
         revalidate();
@@ -151,6 +191,32 @@ public class VisualizzaPortfolioBoundary extends JFrame {
                 new CondivisioneCandidaturaBoundary(dbmsBoundary, portfolio_id);
 
         condivisioneCandidaturaBoundary.mostraPaginaCondivisione();
+    }
+
+    public void cliccaGestioneLicenze() {
+        // <<create>> GestioneLicenzaController
+        GestioneLicenzaController gestioneLicenzaController =
+                new GestioneLicenzaController(this, dbmsBoundary);
+
+        // avviaGestioneLicenza(portfolio_id)
+        gestioneLicenzaController.avviaGestioneLicenza(portfolio_id);
+    }
+
+    public void cliccaGestioneVisibilitaSezioni() {
+        // <<create>> GestioneVisibilitaPortController
+        GestioneVisibilitaPortController gestioneVisibilitaPortController =
+                new GestioneVisibilitaPortController(this, dbmsBoundary);
+
+        gestioneVisibilitaPortController.avviaGestioneVisibilitaSezioni(portfolio_id);
+    }
+
+    public void selezionaOrdinamentoSezioni() {
+        // <<create>> OrdinamentoSezioniController
+        OrdinamentoSezioniController ordinamentoSezioniController =
+                new OrdinamentoSezioniController(this, dbmsBoundary);
+
+        // avviaOrdinamentoSezioni(idPortfolio)
+        ordinamentoSezioniController.avviaOrdinamentoSezioni(portfolio_id);
     }
 
     public void mostraPortfolioAggiungiSezione(SezioneEntity sezione) {

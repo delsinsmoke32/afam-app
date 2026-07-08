@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "licenze")
-public class Licenza {
+public class LicenzaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,26 +21,35 @@ public class Licenza {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descrizione;
 
+    public LicenzaEntity() {
+    }
 
-    // Costruttore vuoto obbligatorio per JPA
-    public Licenza() {}
-
-    public Licenza(String nome, String descrizione) {
+    public LicenzaEntity(String nome, String descrizione) {
         this.nome = nome;
         this.descrizione = descrizione;
     }
 
-    // --- Getter e Setter ---
+    public Long getId() {
+        return id;
+    }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getNome() { return nome; }
-    public void setNome(String nome) { this.nome = nome; }
+    public String getNome() {
+        return nome;
+    }
 
-    public String getDescrizione() { return descrizione; }
-    public void setDescrizione(String descrizione) { this.descrizione = descrizione; }
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getDescrizione() {
+        return descrizione;
+    }
+
+    public void setDescrizione(String descrizione) {
+        this.descrizione = descrizione;
+    }
 }
-
-
-

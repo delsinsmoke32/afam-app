@@ -45,6 +45,12 @@ public class PortfolioEntity {
     private Integer visiteTotali = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "licenza_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private LicenzaEntity licenza;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "studente_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -53,6 +59,5 @@ public class PortfolioEntity {
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<SezioneEntity> sezioni; 
-}   
-
+    private List<SezioneEntity> sezioni;
+}

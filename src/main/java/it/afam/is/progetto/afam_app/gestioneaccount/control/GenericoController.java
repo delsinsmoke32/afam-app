@@ -44,7 +44,14 @@ public class GenericoController {
     public boolean rilevaTokenScaduto() {
         return true;
     }
+
+    public void erroreDBMS() {
+        // <<create>> PopupErroreBoundary
+        PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
+
+        // mostraPopup(testo)
+        popupErroreBoundary.mostraPopup(
+                "Errore di comunicazione con il DBMS. Riprova più tardi."
+        );
+    }
 }
-
-
-

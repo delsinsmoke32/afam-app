@@ -68,7 +68,7 @@ public class GenerazioneURLController {
         LocalDateTime dataScadenza = LocalDateTime.now().plusWeeks(2);
 
         // salvaURL(token, nomeCond, dataScadenza, portfolio_id)
-        link_condiviso_id = dbmsBoundary.salvaURL(token, nome, dataScadenza, portfolio_id);
+        link_condiviso_id = dbmsBoundary.salvaURL(token, nome.trim(), dataScadenza, portfolio_id);
 
         if (link_condiviso_id == null) {
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
@@ -80,10 +80,13 @@ public class GenerazioneURLController {
         urlGenerato = costruisciURL(token);
 
         // <<create>> PopupConfermaBoundary
-        popupConfermaBoundary = new PopupConfermaBoundary(() -> conferma());
+        popupConfermaBoundary = new PopupConfermaBoundary(
+                () -> conferma(),
+                () -> annulla()
+        );
 
         // mostraPopup(testo)
-        popupConfermaBoundary.mostraPopup("URL generato correttamente.");
+        popupConfermaBoundary.mostraPopup("URL generato correttamente. Vuoi gestire manualmente la visibilità delle sezioni?");
     }
 
     public String generaToken() {
@@ -107,6 +110,20 @@ public class GenerazioneURLController {
         // conferma()
         // mandaId(portfolio_id)
         gestioneVisibilitaController.conferma(link_condiviso_id, portfolio_id);
+    }
+
+    public void annulla() {
+        if (popupConfermaBoundary != null) {
+            popupConfermaBoundary.dispose();
+            popupConfermaBoundary = null;
+        }
+
+        // <<create>> GestioneVisibilitaController
+        GestioneVisibilitaController gestioneVisibilitaController =
+                new GestioneVisibilitaController(this, dbmsBoundary);
+
+        // annulla()
+        gestioneVisibilitaController.annulla(link_condiviso_id, portfolio_id);
     }
 
     public void mostraUrlDopoGestioneVisibilita() {

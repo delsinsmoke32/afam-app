@@ -7,10 +7,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
+import it.afam.is.progetto.afam_app.gestioneaccount.control.CSAController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.CancProfController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.GestioneProfiloController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.ModDatiPersController;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.ModificaPwdController;
+import it.afam.is.progetto.afam_app.gestioneaccount.control.RevocaURLController;
 
 public class GestioneProfiloBoundary extends JFrame {
 
@@ -27,29 +29,33 @@ public class GestioneProfiloBoundary extends JFrame {
 
     public void mostraGestioneProfilo() {
         setTitle("Gestione Profilo");
-        setSize(400, 350);
+        setSize(400, 480);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel panel = new JPanel(new GridLayout(5, 1, 10, 10));
+        JPanel panel = new JPanel(new GridLayout(7, 1, 10, 10));
 
         JButton modificaDatiButton = new JButton("Modifica Dati Personali");
         JButton modificaPasswordButton = new JButton("Modifica Password");
         JButton eliminaAccountButton = new JButton("Elimina Account");
+        JButton revocaURLButton = new JButton("Revoca URL");
+        JButton consultaStatisticheButton = new JButton("Consulta statistiche");
         JButton logoutButton = new JButton("Logout");
         JButton chiudiButton = new JButton("Chiudi");
 
         panel.add(modificaDatiButton);
         panel.add(modificaPasswordButton);
         panel.add(eliminaAccountButton);
+        panel.add(revocaURLButton);
+        panel.add(consultaStatisticheButton);
         panel.add(logoutButton);
         panel.add(chiudiButton);
 
         modificaDatiButton.addActionListener(e -> cliccaModificaDati());
-
         modificaPasswordButton.addActionListener(e -> cliccaModificaPassword());
-
         eliminaAccountButton.addActionListener(e -> cliccaEliminaAccount());
+        revocaURLButton.addActionListener(e -> cliccaRevocaURL());
+        consultaStatisticheButton.addActionListener(e -> cliccaConsultaStatistiche());
 
         logoutButton.addActionListener(e -> {
             cliccaLogout();
@@ -59,6 +65,8 @@ public class GestioneProfiloBoundary extends JFrame {
         chiudiButton.addActionListener(e -> dispose());
 
         setContentPane(panel);
+        revalidate();
+        repaint();
         setVisible(true);
     }
 
@@ -77,6 +85,19 @@ public class GestioneProfiloBoundary extends JFrame {
         new CancProfController(this, autenticazioneBoundary, dbmsBoundary);
     }
 
+    public void cliccaRevocaURL() {
+        // <<create>> RevocaURLController
+        new RevocaURLController(this, dbmsBoundary);
+    }
+
+    public void cliccaConsultaStatistiche() {
+        // <<create>> CSAController
+        CSAController csaController = new CSAController(this, dbmsBoundary);
+
+        // recuperaDati()
+        // già chiamato nel costruttore del controller
+    }
+
     public void cliccaLogout() {
         // <<create>> GestioneProfiloController
         GestioneProfiloController gestioneProfiloController =
@@ -86,6 +107,3 @@ public class GestioneProfiloBoundary extends JFrame {
         gestioneProfiloController.logout();
     }
 }
-
-
-

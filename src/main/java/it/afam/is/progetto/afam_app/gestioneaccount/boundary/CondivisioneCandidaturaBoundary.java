@@ -11,6 +11,7 @@ import javax.swing.JPanel;
 
 import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.control.GenerazioneURLController;
+import it.afam.is.progetto.afam_app.gestioneaccount.control.ImpostazioniDownloadController;
 
 public class CondivisioneCandidaturaBoundary extends JFrame {
 
@@ -26,7 +27,7 @@ public class CondivisioneCandidaturaBoundary extends JFrame {
 
     public void mostraPaginaCondivisione() {
         setTitle("Condivisione Candidatura");
-        setSize(550, 280);
+        setSize(600, 340);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -37,8 +38,12 @@ public class CondivisioneCandidaturaBoundary extends JFrame {
         JButton condividiPortfolioButton = new JButton("Condividi portfolio");
         condividiPortfolioButton.addActionListener(e -> cliccaCondividiPortfolio());
 
+        JButton impostazioniDownloadButton = new JButton("Impostazioni download");
+        impostazioniDownloadButton.addActionListener(e -> cliccaImpostazioniDownload());
+
         panel.add(titolo);
         panel.add(condividiPortfolioButton);
+        panel.add(impostazioniDownloadButton);
 
         if (urlGenerato != null) {
             panel.add(new JLabel("URL generato: " + urlGenerato));
@@ -63,10 +68,19 @@ public class CondivisioneCandidaturaBoundary extends JFrame {
         generazioneURLController.mandaIdPortfolio(portfolio_id);
     }
 
+    public void cliccaImpostazioniDownload() {
+        // <<create>> ImpostazioniDownloadController
+        ImpostazioniDownloadController impostazioniDownloadController =
+                new ImpostazioniDownloadController(this, dbmsBoundary);
+
+        // avviaImpostazioniDownload(portfolio_id)
+        impostazioniDownloadController.avviaImpostazioniDownload(portfolio_id);
+    }
+
     public void mostraUrlGenerato(String URL) {
         this.urlGenerato = URL;
 
-        // Dopo mostraUrlGenerato(URL), il sequence mostra la pagina condivisione
+        // mostraPaginaCondivisione()
         mostraPaginaCondivisione();
     }
 

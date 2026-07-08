@@ -30,6 +30,12 @@ public class StatisticaAccessoEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String nome;
+
+    private String cognome;
+
+    private String ruolo;
+
     private LocalDateTime dataOraAccesso;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -40,6 +46,8 @@ public class StatisticaAccessoEntity {
 
     @PrePersist
     protected void onCreate() {
-        this.dataOraAccesso = LocalDateTime.now();
+        if (this.dataOraAccesso == null) {
+            this.dataOraAccesso = LocalDateTime.now();
+        }
     }
 }
