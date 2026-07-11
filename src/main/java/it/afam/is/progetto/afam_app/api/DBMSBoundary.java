@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.hibernate.Hibernate;
 
 import it.afam.is.progetto.afam_app.entity.AllegatoEntity;
 import it.afam.is.progetto.afam_app.entity.CodiceOTPEntity;
@@ -20,7 +21,8 @@ import it.afam.is.progetto.afam_app.entity.Sessione;
 import it.afam.is.progetto.afam_app.entity.StatisticaAccessoEntity;
 import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.entity.VisibilitaSezioneCandidaturaEntity;
-import it.afam.is.progetto.afam_app.gestioneaccount.dto.CredenzialiRegistrazione;
+import it.afam.is.progetto.afam_app.dto.RisultatoRicercaDTO;
+import it.afam.is.progetto.afam_app.dto.CredenzialiRegistrazione;
 import it.afam.is.progetto.afam_app.repository.AllegatoRepository;
 import it.afam.is.progetto.afam_app.repository.CodiceOtpRepository;
 import it.afam.is.progetto.afam_app.repository.LicenzaRepository;
@@ -597,6 +599,7 @@ public class DBMSBoundary {
         }
 
         String token = estraiTokenDaURL(URL);
+        System.out.println("DEBUG - Token estratto per la ricerca: [" + token + "]");
 
         if (token == null || token.trim().isEmpty()) {
             return null;
@@ -604,6 +607,8 @@ public class DBMSBoundary {
 
         LinkCondivisoEntity linkCondiviso =
                 linkCondivisoRepository.findByTokenUrl(token).orElse(null);
+
+        System.out.println("DEBUG - Link trovato nel DB: " + (linkCondiviso != null ? "SI, ID=" + linkCondiviso.getId() : "NO"));
 
         if (linkCondiviso == null) {
             return null;
@@ -705,7 +710,14 @@ public class DBMSBoundary {
             return null;
         }
 
-        return portfolioRepository.findById(portfolio_id).orElse(null);
+        PortfolioEntity portfolio = portfolioRepository.findById(portfolio_id).orElse(null);
+
+        if (portfolio != null) {
+            // Svegliamo la Licenza mentre la connessione è ancora aperta!
+            Hibernate.initialize(portfolio.getLicenza());
+        }
+
+        return portfolio;
     }
 
     @Transactional(readOnly = true)
@@ -717,6 +729,8 @@ public class DBMSBoundary {
         List<VisibilitaSezioneCandidaturaEntity> impostazioni =
                 visibilitaSezioneCandidaturaRepository.findByLinkCondivisoId(link_condiviso_id);
 
+        System.out.println("DEBUG - Trovate " + (impostazioni != null ? impostazioni.size() : "NULL") + " righe nella tabella di visibilità per link: " + link_condiviso_id);
+
         if (impostazioni == null || impostazioni.isEmpty()) {
             return new ArrayList<>();
         }
@@ -724,6 +738,7 @@ public class DBMSBoundary {
         List<SezioneEntity> sezioniVisibili = new ArrayList<>();
 
         for (VisibilitaSezioneCandidaturaEntity impostazione : impostazioni) {
+            System.out.println("DEBUG - Controllo riga: SezioneID=" + (impostazione.getSezione() != null ? impostazione.getSezione().getId() : "NULL") + ", Visibile=" + impostazione.getVisibile());
             if (!Boolean.TRUE.equals(impostazione.getVisibile())) {
                 continue;
             }
@@ -738,6 +753,7 @@ public class DBMSBoundary {
                     sezioneRepository.findById(sezioneProxy.getId()).orElse(null);
 
             if (sezioneVera != null) {
+                Hibernate.initialize(sezioneVera.getAllegati());
                 sezioniVisibili.add(sezioneVera);
             }
         }
@@ -1105,57 +1121,85 @@ public void queryAggiornaOrdineSezioni(List<Long> nuovoOrdine, Long idPortfolio)
     }
 }
 
-public List<StudenteEntity> ricercaStudente(String ricerca) {
+public List<RisultatoRicercaDTO> ricercaStudente(String ricerca) {
     return queryRicercaStudente(ricerca);
 }
 
-public List<StudenteEntity> queryRicercaStudente(String ricerca) {
-    List<StudenteEntity> risultatiRicerca = new ArrayList<>();
+    public List<RisultatoRicercaDTO> queryRicercaStudente(String ricerca) {
+        List<RisultatoRicercaDTO> risultatiRicerca = new ArrayList<>();
 
-    if (ricerca == null || ricerca.trim().isEmpty()) {
+        if (ricerca == null || ricerca.trim().isEmpty()) {
+            return risultatiRicerca;
+        }
+
+        String filtro = ricerca.trim().toLowerCase();
+
+        List<StudenteEntity> studenti = studenteRepository.findAll();
+
+        if (studenti == null || studenti.isEmpty()) {
+            return risultatiRicerca;
+        }
+
+        for (StudenteEntity studente : studenti) {
+            if (studente == null || studente.getId() == null) {
+                continue;
+            }
+
+            String nome = studente.getNome() != null ? studente.getNome().toLowerCase() : "";
+            String cognome = studente.getCognome() != null ? studente.getCognome().toLowerCase() : "";
+            String corsoDiStudi = studente.getCorsoDiStudi() != null ? studente.getCorsoDiStudi().toLowerCase() : "";
+
+            // Se lo studente matcha i criteri di ricerca
+            if (nome.contains(filtro)
+                    || cognome.contains(filtro)
+                    || corsoDiStudi.contains(filtro)
+                    || (nome + " " + cognome).contains(filtro)) {
+
+                // Recuperiamo la lista dei suoi portfoli (usando il tuo metodo già esistente)
+                List<PortfolioEntity> portfoli = recuperaListaPortfoli(studente.getId());
+
+                // Prendiamo il primo portfolio (se esiste)
+                PortfolioEntity primoPortfolio = (portfoli != null && !portfoli.isEmpty()) ? portfoli.get(0) : null;
+
+                // Aggiungiamo il risultato alla lista SOLO se ha un portfolio da mostrare
+                if (primoPortfolio != null) {
+                    risultatiRicerca.add(new RisultatoRicercaDTO(studente, primoPortfolio));
+                }
+            }
+        }
+
         return risultatiRicerca;
     }
 
-    String filtro = ricerca.trim().toLowerCase();
-
-    List<StudenteEntity> studenti = studenteRepository.findAll();
-
-    if (studenti == null || studenti.isEmpty()) {
-        return risultatiRicerca;
-    }
-
-    for (StudenteEntity studente : studenti) {
-        if (studente == null) {
-            continue;
-        }
-
-        String nome = studente.getNome() != null ? studente.getNome().toLowerCase() : "";
-        String cognome = studente.getCognome() != null ? studente.getCognome().toLowerCase() : "";
-        String corsoDiStudi = studente.getCorsoDiStudi() != null ? studente.getCorsoDiStudi().toLowerCase() : "";
-
-        if (nome.contains(filtro)
-                || cognome.contains(filtro)
-                || corsoDiStudi.contains(filtro)
-                || (nome + " " + cognome).contains(filtro)) {
-            risultatiRicerca.add(studente);
-        }
-    }
-
-    return risultatiRicerca;
-}
-
-public List<StudenteEntity> getElencoStudenti() {
+public List<RisultatoRicercaDTO> getElencoStudenti() {
     return queryGetElencoStudenti();
 }
 
-public List<StudenteEntity> queryGetElencoStudenti() {
-    List<StudenteEntity> elencoStudenti = studenteRepository.findAll();
+public List<RisultatoRicercaDTO> queryGetElencoStudenti() {
+    List<RisultatoRicercaDTO> lista = new ArrayList<>();
+    List<StudenteEntity> studenti = studenteRepository.findAll();
 
-    if (elencoStudenti == null || elencoStudenti.isEmpty()) {
-        return new ArrayList<>();
+    if (studenti == null || studenti.isEmpty()) {
+        return lista;
     }
 
-    return elencoStudenti;
+    for (StudenteEntity studente : studenti) {
+        if (studente == null || studente.getId() == null) {
+            continue;
+        }
+
+        // Recupera la lista dei suoi portfoli
+        List<PortfolioEntity> portfoli = recuperaListaPortfoli(studente.getId());
+
+        // Prende il primo portfolio disponibile (se c'è)
+        PortfolioEntity primoPortfolio = (portfoli != null && !portfoli.isEmpty()) ? portfoli.get(0) : null;
+
+        // Aggiunge alla lista solo se lo studente ha effettivamente un portfolio da mostrare
+        if (primoPortfolio != null) {
+            lista.add(new RisultatoRicercaDTO(studente, primoPortfolio));
+        }
+    }
+    return lista;
 }
 
 @Transactional(readOnly = true)
@@ -1174,13 +1218,20 @@ public PortfolioEntity queryRecuperaPortfolioPubblico(Long portfolio_id) {
     if (portfolio == null) {
         return null;
     }
-
+    Hibernate.initialize(portfolio.getLicenza());
     List<SezioneEntity> sezioniPortfolio = sezioneRepository.findByPortfolioId(portfolio_id);
     List<SezioneEntity> sezioniPubbliche = new ArrayList<>();
 
     if (sezioniPortfolio != null) {
         for (SezioneEntity sezione : sezioniPortfolio) {
             if (sezione != null && Boolean.TRUE.equals(sezione.getIsPubblica())) {
+
+                // --- INIZIO MODIFICA MAGICA ---
+                // Diciamo a Hibernate di scaricare fisicamente i file allegati dal DB
+                // ora che la connessione è ancora aperta!
+                Hibernate.initialize(sezione.getAllegati());
+                // --- FINE MODIFICA MAGICA ---
+
                 sezioniPubbliche.add(sezione);
             }
         }

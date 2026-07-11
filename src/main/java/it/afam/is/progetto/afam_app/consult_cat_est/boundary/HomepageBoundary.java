@@ -4,17 +4,20 @@ import org.springframework.stereotype.Component;
 import javax.swing.*;
 import java.awt.*;
 import it.afam.is.progetto.afam_app.api.DBMSBoundary;
+import it.afam.is.progetto.afam_app.api.EmailBoundary;
 import it.afam.is.progetto.afam_app.autenticazione.boundary.AutenticazioneBoundary;
 import it.afam.is.progetto.afam_app.consult_cat_est.controller.*;
 
 @Component
 public class HomepageBoundary extends JFrame {
     private final DBMSBoundary dbmsBoundary;
+    private final EmailBoundary emailBoundary;
     private JTextField urlField, ricercaField, portfolioIdField;
     private RicercaStudentiController ricercaStudentiController;
 
-    public HomepageBoundary(DBMSBoundary dbmsBoundary) {
+    public HomepageBoundary(DBMSBoundary dbmsBoundary, EmailBoundary emailBoundary) {
         this.dbmsBoundary = dbmsBoundary;
+        this.emailBoundary = emailBoundary;
     }
 
     public void mostraHomepage() {
@@ -27,8 +30,9 @@ public class HomepageBoundary extends JFrame {
         // Top: Bottone per andare ad Autenticazione
         JButton btnAuth = new JButton("Autenticati (Area Studenti)");
         btnAuth.addActionListener(e -> {
-            dispose(); // Chiude la home e apre l'area studenti
-            new AutenticazioneBoundary(dbmsBoundary).mostraPaginaAuth();
+            dispose();
+            // 3. Ora passi entrambi gli oggetti richiesti dal nuovo costruttore
+            new AutenticazioneBoundary(dbmsBoundary, emailBoundary).mostraPaginaAuth();
         });
         JPanel top = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         top.add(btnAuth);
@@ -51,9 +55,6 @@ public class HomepageBoundary extends JFrame {
         JButton elencoStudentiButton = new JButton("Mostra Elenco Completo Studenti");
         elencoStudentiButton.addActionListener(e -> cliccaMostraElencoStudenti());
 
-        JButton visualizzaButton = new JButton("Visualizza portfolio pubblico");
-        visualizzaButton.addActionListener(e -> cliccaVisualizza());
-
         panel.add(new JLabel("URL Portfolio Condiviso:"));
         panel.add(urlField);
         panel.add(apriUrlButton);
@@ -63,10 +64,6 @@ public class HomepageBoundary extends JFrame {
         panel.add(ricercaButton);
 
         panel.add(elencoStudentiButton);
-
-        panel.add(new JLabel("Inserisci ID portfolio:"));
-        panel.add(portfolioIdField);
-        panel.add(visualizzaButton);
 
         add(panel, BorderLayout.CENTER);
         setVisible(true);
@@ -86,13 +83,5 @@ public class HomepageBoundary extends JFrame {
 
     public void cliccaMostraElencoStudenti() {
         new VisualizzazioneElencoStudentiController(this, dbmsBoundary).recuperaElencoStudenti();
-    }
-
-    public void cliccaVisualizza() {
-        try {
-            new VisualizzazionePortfolioPubblicoController(this, dbmsBoundary).mandaIdPortfolio(Long.parseLong(portfolioIdField.getText()));
-        } catch (Exception e) {
-            // Ignora o gestisci l'errore di parsing
-        }
     }
 }

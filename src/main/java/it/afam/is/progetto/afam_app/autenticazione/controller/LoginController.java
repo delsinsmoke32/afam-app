@@ -10,8 +10,7 @@ import it.afam.is.progetto.afam_app.entity.Sessione;
 import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.autenticazione.boundary.AutenticazioneBoundary;
 import it.afam.is.progetto.afam_app.autenticazione.boundary.FormLoginBoundary;
-import it.afam.is.progetto.afam_app.autenticazione.boundary.FormOTPBoundary;
-import it.afam.is.progetto.afam_app.autenticazione.boundary.LoginBoundary;
+import it.afam.is.progetto.afam_app.autenticazione.boundary.LoginOTPBoundary;
 import it.afam.is.progetto.afam_app.gestione_profilo.boundary.PaginaPersonaleBoundary;
 import it.afam.is.progetto.afam_app.common.PopupErroreBoundary;
 import it.afam.is.progetto.afam_app.common.PopupSuccessoBoundary;
@@ -36,9 +35,6 @@ public class LoginController {
         this.autenticazioneBoundary = autenticazioneBoundary;
         this.dbmsBoundary = dbmsBoundary;
         this.emailBoundary = emailBoundary;
-
-        LoginBoundary loginBoundary = new LoginBoundary();
-        loginBoundary.mostraLogin();
 
         FormLoginBoundary formLoginBoundary = new FormLoginBoundary(this);
         formLoginBoundary.MostraFormLogin();
@@ -75,8 +71,8 @@ public class LoginController {
             PopupSuccessoBoundary popupSuccessoBoundary = new PopupSuccessoBoundary();
             popupSuccessoBoundary.mostraSuccesso();
 
-            FormOTPBoundary formOTPBoundary = new FormOTPBoundary(this);
-            formOTPBoundary.mostraFormOTP();
+            LoginOTPBoundary loginOTPBoundary = new LoginOTPBoundary(this);
+            loginOTPBoundary.mostraFormOTP();
         } else {
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
             popupErroreBoundary.mostraPopup("Credenziali errate.");
@@ -107,11 +103,7 @@ public class LoginController {
         boolean otpCorretto = ControllaOTP(OTP, codiceOTP);
 
         if (otpCorretto) {
-            Sessione sessione = new Sessione();
-
-            // login(studente)
-            sessione.login(studente);
-
+            Sessione.getInstance().login(studente);
             PaginaPersonaleBoundary paginaPersonaleBoundary =
                     new PaginaPersonaleBoundary(autenticazioneBoundary, dbmsBoundary);
 

@@ -1,7 +1,7 @@
 package it.afam.is.progetto.afam_app.autenticazione.boundary;
 
 import java.awt.GridLayout;
-
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -10,18 +10,22 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import it.afam.is.progetto.afam_app.autenticazione.controller.RegistrazioneController;
-import it.afam.is.progetto.afam_app.gestioneaccount.dto.CredenzialiRegistrazione;
+import it.afam.is.progetto.afam_app.dto.CredenzialiRegistrazione;
 
 public class FormRegistrazioneBoundary extends JFrame {
 
     private final RegistrazioneController registrazioneController;
 
+    private JTextField codiceFiscaleField;
     private JTextField nomeField;
     private JTextField cognomeField;
     private JTextField emailField;
     private JPasswordField passwordField;
-    private JTextField codiceFiscaleField;
     private JTextField corsoDiStudiField;
+    private JTextField dataDiNascitaField;
+    private JTextField linkPersonaleField;
+    private JTextField biografiaField;
+
     private CredenzialiRegistrazione credenziali;
 
     public FormRegistrazioneBoundary(RegistrazioneController registrazioneController) {
@@ -30,43 +34,58 @@ public class FormRegistrazioneBoundary extends JFrame {
 
     public void mostraFormReg() {
         setTitle("Registrazione");
-        setSize(450, 350);
+        setSize(450, 450); // Aumentato per fare spazio ai nuovi campi
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        JPanel panel = new JPanel(new GridLayout(7, 2, 10, 10));
+        // 10 righe, 2 colonne
+        JPanel panel = new JPanel(new GridLayout(10, 2, 10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40)); // Margini per un look più pulito
 
+        codiceFiscaleField = new JTextField();
         nomeField = new JTextField();
         cognomeField = new JTextField();
         emailField = new JTextField();
         passwordField = new JPasswordField();
-        codiceFiscaleField = new JTextField();
         corsoDiStudiField = new JTextField();
+        dataDiNascitaField = new JTextField();
+        linkPersonaleField = new JTextField();
+        biografiaField = new JTextField();
 
-        JButton okButton = new JButton("OK");
+        JButton registratiButton = new JButton("Registrati");
 
-        panel.add(new JLabel("Nome *"));
-        panel.add(nomeField);
-
-        panel.add(new JLabel("Cognome *"));
-        panel.add(cognomeField);
-
-        panel.add(new JLabel("Email *"));
-        panel.add(emailField);
-
-        panel.add(new JLabel("Password *"));
-        panel.add(passwordField);
-
-        panel.add(new JLabel("Codice fiscale *"));
+        // Aggiunti nello stesso ordine della foto
+        panel.add(new JLabel("Codice Fiscale:"));
         panel.add(codiceFiscaleField);
 
-        panel.add(new JLabel("Corso di studi"));
+        panel.add(new JLabel("Nome:"));
+        panel.add(nomeField);
+
+        panel.add(new JLabel("Cognome:"));
+        panel.add(cognomeField);
+
+        panel.add(new JLabel("Email:"));
+        panel.add(emailField);
+
+        panel.add(new JLabel("Password:"));
+        panel.add(passwordField);
+
+        panel.add(new JLabel("Corso di Studi:"));
         panel.add(corsoDiStudiField);
 
-        panel.add(new JLabel(""));
-        panel.add(okButton);
+        panel.add(new JLabel("Data di Nascita (YYYY-MM-DD):"));
+        panel.add(dataDiNascitaField);
 
-        okButton.addActionListener(e -> cliccaOK());
+        panel.add(new JLabel("Link Personale:"));
+        panel.add(linkPersonaleField);
+
+        panel.add(new JLabel("Biografia:"));
+        panel.add(biografiaField);
+
+        panel.add(new JLabel("")); // Spazio vuoto per allineare il bottone a destra
+        panel.add(registratiButton);
+
+        registratiButton.addActionListener(e -> cliccaOK());
 
         setContentPane(panel);
         setVisible(true);
@@ -77,13 +96,17 @@ public class FormRegistrazioneBoundary extends JFrame {
     }
 
     public void cliccaOK() {
+        // NOTA: Aggiorna il costruttore di CredenzialiRegistrazione per accettare i nuovi campi!
         CredenzialiRegistrazione credenziali = new CredenzialiRegistrazione(
                 nomeField.getText(),
                 cognomeField.getText(),
                 emailField.getText(),
                 new String(passwordField.getPassword()),
                 codiceFiscaleField.getText(),
-                corsoDiStudiField.getText()
+                corsoDiStudiField.getText(),
+                biografiaField.getText(),
+                linkPersonaleField.getText(),
+                dataDiNascitaField.getText()
         );
 
         inserisciCredenziali(credenziali);
@@ -91,6 +114,3 @@ public class FormRegistrazioneBoundary extends JFrame {
         dispose();
     }
 }
-
-
-

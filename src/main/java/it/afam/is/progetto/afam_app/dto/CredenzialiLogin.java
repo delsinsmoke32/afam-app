@@ -1,4 +1,4 @@
-package it.afam.is.progetto.afam_app.gestioneaccount.dto;
+package it.afam.is.progetto.afam_app.dto;
 
 public class CredenzialiLogin {
 

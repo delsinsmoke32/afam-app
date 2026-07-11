@@ -41,48 +41,29 @@ public class PwdRecController {
         pwdRecBoundary.mostraPwdRec();
     }
 
+    // Estratto di PwdRecController.java - Metodo richiediReset
     public void richiediReset(String mail) {
-        // verificaEsistenza(mail)
         studente = dbmsBoundary.verificaEsistenza(mail);
 
-        // alt
-        // [studente != null]
         if (studente != null) {
-
-            Long studente_id = studente.getId();
             LocalDateTime scadenza = LocalDateTime.now().plusMinutes(5);
-
-            // generaCodiceOTP(studente_id, scadenza)
-            codiceOTP = generaCodiceOTP(studente_id, scadenza);
-
-            // salvaOTP(codiceOTP)
+            codiceOTP = generaCodiceOTP(studente.getId(), scadenza);
             dbmsBoundary.salvaOTP(codiceOTP);
 
             String destinatario = mail;
             String oggetto = "Recupero password AFAM";
+            // Assicuriamoci di passare la stringa del codice
             String corpo = "Il tuo codice OTP per recuperare la password è: " + codiceOTP.getCodice();
 
-            // InviaEmail(destinatario, oggetto, corpo)
+            // Chiamata conforme al Sequence Diagram
             emailBoundary.InviaEmail(destinatario, oggetto, corpo);
 
-            // <<create>> PopupSuccessoBoundary
             PopupSuccessoBoundary popupSuccessoBoundary = new PopupSuccessoBoundary();
-
-            // mostraPopup(testo)
             popupSuccessoBoundary.mostraPopup("Codice OTP inviato via email.");
-
-            // mostraFormOTP()
             pwdRecBoundary.mostraFormOTP();
-
         } else {
-            // [else]
-            // <<create>> PopupErroreBoundary
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
-
-            // mostraPopup(testo)
             popupErroreBoundary.mostraPopup("Email non trovata.");
-
-            // mostraAutenticazione()
             autenticazioneBoundary.mostraAutenticazione();
         }
     }

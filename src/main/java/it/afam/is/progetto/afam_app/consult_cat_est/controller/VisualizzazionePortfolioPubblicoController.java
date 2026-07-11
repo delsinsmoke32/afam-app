@@ -1,6 +1,7 @@
 package it.afam.is.progetto.afam_app.consult_cat_est.controller;
 
 import it.afam.is.progetto.afam_app.api.DBMSBoundary;
+import it.afam.is.progetto.afam_app.consult_cat_est.boundary.VisualizzazioneElencoStudentiBoundary;
 import it.afam.is.progetto.afam_app.entity.PortfolioEntity;
 import it.afam.is.progetto.afam_app.consult_cat_est.boundary.HomepageBoundary;
 import it.afam.is.progetto.afam_app.consult_cat_est.boundary.PaginaRicercaBoundary;
@@ -11,6 +12,7 @@ public class VisualizzazionePortfolioPubblicoController {
 
     private HomepageBoundary homepageBoundary;
     private PaginaRicercaBoundary paginaRicercaBoundary;
+    private VisualizzazioneElencoStudentiBoundary visualizzazioneElencoStudentiBoundary;
 
     private final DBMSBoundary dbmsBoundary;
 
@@ -29,6 +31,14 @@ public class VisualizzazionePortfolioPubblicoController {
             DBMSBoundary dbmsBoundary
     ) {
         this.paginaRicercaBoundary = paginaRicercaBoundary;
+        this.dbmsBoundary = dbmsBoundary;
+    }
+
+    public VisualizzazionePortfolioPubblicoController(
+            VisualizzazioneElencoStudentiBoundary visualizzazioneElencoStudentiBoundary,
+            DBMSBoundary dbmsBoundary
+    ) {
+        this.visualizzazioneElencoStudentiBoundary = visualizzazioneElencoStudentiBoundary;
         this.dbmsBoundary = dbmsBoundary;
     }
 

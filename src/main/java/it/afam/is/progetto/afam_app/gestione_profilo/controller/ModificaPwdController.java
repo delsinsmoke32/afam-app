@@ -28,8 +28,7 @@ public class ModificaPwdController {
     public void mandaDati(String vecchia_pwd, String nuova_pwd, String conf_pwd) {
         formModPwdBoundary.chiudiForm();
 
-        Sessione sessione = new Sessione();
-        StudenteEntity StudenteEntity = sessione.getStudente();
+        StudenteEntity StudenteEntity = Sessione.getInstance().getStudente();
 
         if (StudenteEntity == null) {
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();

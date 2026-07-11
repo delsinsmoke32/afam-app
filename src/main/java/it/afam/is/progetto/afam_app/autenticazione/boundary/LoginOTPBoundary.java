@@ -10,14 +10,14 @@ import javax.swing.JTextField;
 
 import it.afam.is.progetto.afam_app.autenticazione.controller.LoginController;
 
-public class FormOTPBoundary extends JFrame {
+public class LoginOTPBoundary extends JFrame {
 
     private final LoginController loginController;
 
     private JTextField otpField;
     private String OTP;
 
-    public FormOTPBoundary(LoginController loginController) {
+    public LoginOTPBoundary(LoginController loginController) {
         this.loginController = loginController;
     }
 

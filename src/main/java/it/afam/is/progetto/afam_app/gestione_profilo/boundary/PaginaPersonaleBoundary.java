@@ -29,7 +29,7 @@ public class PaginaPersonaleBoundary extends JFrame {
         setTitle("Pagina personale");
         setSize(450, 280);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridLayout(4, 1, 10, 10));
 
@@ -37,25 +37,14 @@ public class PaginaPersonaleBoundary extends JFrame {
 
         JButton gestioneProfiloButton = new JButton("Gestione profilo");
         JButton gestionePortfolioButton = new JButton("Gestione Portfolio");
-        JButton logoutButton = new JButton("Logout");
 
         panel.add(titolo);
         panel.add(gestioneProfiloButton);
         panel.add(gestionePortfolioButton);
-        panel.add(logoutButton);
 
         gestioneProfiloButton.addActionListener(e -> cliccaGestioneProfilo());
 
         gestionePortfolioButton.addActionListener(e -> cliccaGestionePortfolio());
-
-        logoutButton.addActionListener(e -> {
-            GestioneProfiloBoundary gestioneProfiloBoundary =
-                    new GestioneProfiloBoundary(autenticazioneBoundary, dbmsBoundary);
-
-            gestioneProfiloBoundary.cliccaLogout();
-
-            dispose();
-        });
 
         setContentPane(panel);
         setVisible(true);

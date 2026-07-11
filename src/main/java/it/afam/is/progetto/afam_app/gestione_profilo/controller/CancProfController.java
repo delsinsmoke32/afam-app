@@ -75,8 +75,7 @@ public class CancProfController {
             // Nel codice reale StudenteEntity è StudenteEntity: viene eliminato dal DB.
 
             // logout()
-            Sessione sessione = new Sessione();
-            sessione.logout();
+            Sessione.getInstance().logout();
 
             // <<create>> PopupSuccessoBoundary
             PopupSuccessoBoundary popupSuccessoBoundary = new PopupSuccessoBoundary();

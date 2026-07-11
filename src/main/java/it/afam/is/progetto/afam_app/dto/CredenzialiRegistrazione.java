@@ -1,4 +1,4 @@
-package it.afam.is.progetto.afam_app.gestioneaccount.dto;
+package it.afam.is.progetto.afam_app.dto;
 
 public class CredenzialiRegistrazione {
 
@@ -8,6 +8,9 @@ public class CredenzialiRegistrazione {
     private String password;
     private String codiceFiscale;
     private String corsoDiStudi;
+    private String dataDiNascita;
+    private String linkPersonale;
+    private String biografia;
 
     public CredenzialiRegistrazione(
             String nome,
@@ -15,7 +18,10 @@ public class CredenzialiRegistrazione {
             String email,
             String password,
             String codiceFiscale,
-            String corsoDiStudi
+            String corsoDiStudi,
+            String linkPersonale,
+            String biografia,
+            String dataDiNascita
     ) {
         this.nome = nome;
         this.cognome = cognome;
@@ -23,6 +29,9 @@ public class CredenzialiRegistrazione {
         this.password = password;
         this.codiceFiscale = codiceFiscale;
         this.corsoDiStudi = corsoDiStudi;
+        this.biografia = biografia;
+        this.linkPersonale = linkPersonale;
+        this.dataDiNascita = dataDiNascita;
     }
 
     public String getNome() {
@@ -48,6 +57,12 @@ public class CredenzialiRegistrazione {
     public String getCorsoDiStudi() {
         return corsoDiStudi;
     }
+
+    public String getLinkPersonale() { return linkPersonale; }
+
+    public String getBiografia() { return biografia; }
+
+    public String getDataDiNascita() { return dataDiNascita; }
 }
 
 

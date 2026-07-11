@@ -13,8 +13,7 @@ public class GestioneProfiloController {
     }
 
     public void logout() {
-        Sessione sessione = new Sessione();
-        sessione.logout();
+        Sessione.getInstance().logout();
 
         PopupSuccessoBoundary popupSuccessoBoundary = new PopupSuccessoBoundary();
         popupSuccessoBoundary.mostraPopup("Logout effettuato con successo.");

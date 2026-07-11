@@ -3,7 +3,7 @@ package it.afam.is.progetto.afam_app.consult_cat_est.controller;
 import java.util.List;
 
 import it.afam.is.progetto.afam_app.api.DBMSBoundary;
-import it.afam.is.progetto.afam_app.entity.StudenteEntity;
+import it.afam.is.progetto.afam_app.dto.RisultatoRicercaDTO;
 import it.afam.is.progetto.afam_app.consult_cat_est.boundary.HomepageBoundary;
 import it.afam.is.progetto.afam_app.common.PopupErroreBoundary;
 import it.afam.is.progetto.afam_app.consult_cat_est.boundary.VisualizzazioneElencoStudentiBoundary;
@@ -23,12 +23,12 @@ public class VisualizzazioneElencoStudentiController {
 
     public void recuperaElencoStudenti() {
         // getElencoStudenti()
-        List<StudenteEntity> elencoStudenti = dbmsBoundary.getElencoStudenti();
+        List<RisultatoRicercaDTO> elencoStudenti = dbmsBoundary.getElencoStudenti();
 
         if (elencoStudenti != null && !elencoStudenti.isEmpty()) {
             // <<create>> VisualizzazioneElencoStudentiBoundary
             VisualizzazioneElencoStudentiBoundary visualizzazioneElencoStudentiBoundary =
-                    new VisualizzazioneElencoStudentiBoundary();
+                    new VisualizzazioneElencoStudentiBoundary(dbmsBoundary);
 
             // mostraElencoStudenti(elencoStudenti)
             visualizzazioneElencoStudentiBoundary.mostraElencoStudenti(elencoStudenti);
@@ -37,7 +37,7 @@ public class VisualizzazioneElencoStudentiController {
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
 
             // mostraPopup(testo)
-            popupErroreBoundary.mostraPopup("Nessuno studente disponibile.");
+            popupErroreBoundary.mostraPopup("Nessuno studente disponibile o nessun portfolio pubblico presente.");
         }
     }
 }

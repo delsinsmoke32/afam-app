@@ -1,41 +1,128 @@
 package it.afam.is.progetto.afam_app.consult_cat_est.boundary;
 
-import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.AbstractTableModel;
 
+import it.afam.is.progetto.afam_app.api.DBMSBoundary;
+import it.afam.is.progetto.afam_app.dto.RisultatoRicercaDTO;
+import it.afam.is.progetto.afam_app.entity.PortfolioEntity;
 import it.afam.is.progetto.afam_app.entity.StudenteEntity;
+import it.afam.is.progetto.afam_app.consult_cat_est.controller.VisualizzazionePortfolioPubblicoController;
 
 public class VisualizzazioneElencoStudentiBoundary extends JFrame {
 
-    public void mostraElencoStudenti(List<StudenteEntity> elencoStudenti) {
-        setTitle("Elenco Studenti");
-        setSize(650, 400);
+    private final DBMSBoundary dbmsBoundary;
+    private JTable tabellaRisultati;
+    private PortfolioTableModel tableModel;
+    private JButton btnVisualizza;
+
+    public VisualizzazioneElencoStudentiBoundary(DBMSBoundary dbmsBoundary) {
+        this.dbmsBoundary = dbmsBoundary;
+    }
+
+    public void mostraElencoStudenti(List<RisultatoRicercaDTO> elencoStudenti) {
+        setTitle("Elenco Completo Studenti");
+        setSize(800, 500);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
 
-        JPanel panel = new JPanel(new GridLayout(0, 1));
+        // --- TOP PANEL ---
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        topPanel.add(new JLabel("Seleziona un portfolio dalla lista per visualizzarlo:"));
+        add(topPanel, BorderLayout.NORTH);
 
-        panel.add(new JLabel("Elenco studenti:"));
+        // --- CENTER PANEL (JTable) ---
+        tableModel = new PortfolioTableModel(elencoStudenti);
+        tabellaRisultati = new JTable(tableModel);
+        tabellaRisultati.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tabellaRisultati.setRowHeight(24);
 
-        for (StudenteEntity studente : elencoStudenti) {
-            if (studente == null) {
-                continue;
+        // Gestione abilitazione bottone al click sulla riga
+        tabellaRisultati.getSelectionModel().addListSelectionListener(e -> {
+            int selectedRow = tabellaRisultati.getSelectedRow();
+            btnVisualizza.setEnabled(selectedRow >= 0);
+        });
+
+        JScrollPane scrollPane = new JScrollPane(tabellaRisultati);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        add(scrollPane, BorderLayout.CENTER);
+
+        // --- BOTTOM PANEL (Bottoni) ---
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+        btnVisualizza = new JButton("Visualizza Portfolio Pubblico");
+        btnVisualizza.setEnabled(false); // Disabilitato finché non si seleziona una riga
+
+        btnVisualizza.addActionListener(e -> {
+            int selectedRow = tabellaRisultati.getSelectedRow();
+            if (selectedRow >= 0) {
+                PortfolioEntity portfolioSelezionato = tableModel.getPortfolioAt(selectedRow);
+                cliccaVisualizza(portfolioSelezionato);
             }
+        });
 
-            String nome = studente.getNome() != null ? studente.getNome() : "";
-            String cognome = studente.getCognome() != null ? studente.getCognome() : "";
-            String corso = studente.getCorsoDiStudi() != null ? studente.getCorsoDiStudi() : "";
+        bottomPanel.add(btnVisualizza);
+        add(bottomPanel, BorderLayout.SOUTH);
 
-            panel.add(new JLabel(nome + " " + cognome + " - " + corso));
+        setVisible(true);
+    }
+
+    public void cliccaVisualizza(PortfolioEntity portfolio) {
+        if (portfolio == null || portfolio.getId() == null) return;
+
+        VisualizzazionePortfolioPubblicoController controller =
+                new VisualizzazionePortfolioPubblicoController(this, dbmsBoundary);
+
+        controller.mandaIdPortfolio(portfolio.getId());
+    }
+
+    // --- TABLE MODEL PERSONALIZZATO ---
+    private static class PortfolioTableModel extends AbstractTableModel {
+        private final String[] columnNames = {"Nome", "Cognome", "Titolo Portfolio", "Descrizione"};
+        private final List<RisultatoRicercaDTO> data;
+
+        public PortfolioTableModel(List<RisultatoRicercaDTO> data) {
+            this.data = data != null ? data : new ArrayList<>();
         }
 
-        setContentPane(panel);
-        revalidate();
-        repaint();
-        setVisible(true);
+        @Override
+        public int getRowCount() { return data.size(); }
+
+        @Override
+        public int getColumnCount() { return columnNames.length; }
+
+        @Override
+        public String getColumnName(int column) { return columnNames[column]; }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            RisultatoRicercaDTO row = data.get(rowIndex);
+            StudenteEntity s = row.getStudente();
+            PortfolioEntity p = row.getPortfolio();
+
+            switch (columnIndex) {
+                case 0: return (s != null && s.getNome() != null) ? s.getNome() : "";
+                case 1: return (s != null && s.getCognome() != null) ? s.getCognome() : "";
+                case 2: return (p != null && p.getTitolo() != null) ? p.getTitolo() : "";
+                case 3: return (p != null && p.getDescrizione() != null) ? p.getDescrizione() : "";
+                default: return null;
+            }
+        }
+
+        public PortfolioEntity getPortfolioAt(int rowIndex) {
+            return data.get(rowIndex).getPortfolio();
+        }
     }
 }

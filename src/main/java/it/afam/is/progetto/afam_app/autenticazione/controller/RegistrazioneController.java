@@ -1,11 +1,14 @@
 package it.afam.is.progetto.afam_app.autenticazione.controller;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 import it.afam.is.progetto.afam_app.api.DBMSBoundary;
 import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.autenticazione.boundary.AutenticazioneBoundary;
 import it.afam.is.progetto.afam_app.autenticazione.boundary.FormRegistrazioneBoundary;
 import it.afam.is.progetto.afam_app.common.PopupErroreBoundary;
-import it.afam.is.progetto.afam_app.gestioneaccount.dto.CredenzialiRegistrazione;
+import it.afam.is.progetto.afam_app.dto.CredenzialiRegistrazione;
 
 public class RegistrazioneController {
 
@@ -23,9 +26,7 @@ public class RegistrazioneController {
 
     public void mandaCredenziali(CredenzialiRegistrazione credenziali) {
         if (!verificaCredenzialiNotEmpty(credenziali)) {
-            PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
-            popupErroreBoundary.mostraPopupErrore();
-
+            new PopupErroreBoundary().mostraPopupErrore("Compila tutti i campi obbligatori.");
             autenticazioneBoundary.mostraAutenticazione();
             return;
         }
@@ -33,6 +34,19 @@ public class RegistrazioneController {
         boolean verificaCredenziali = verificaCredenziali(credenziali);
 
         if (verificaCredenziali) {
+
+            // Gestione sicura della data di nascita
+            LocalDate dataNascitaParsed = null;
+            try {
+                if (credenziali.getDataDiNascita() != null && !credenziali.getDataDiNascita().trim().isEmpty()) {
+                    dataNascitaParsed = LocalDate.parse(credenziali.getDataDiNascita().trim());
+                }
+            } catch (DateTimeParseException e) {
+                new PopupErroreBoundary().mostraPopup("Formato data errato. Usa YYYY-MM-DD.");
+                autenticazioneBoundary.mostraAutenticazione();
+                return;
+            }
+
             // <<create>> StudenteEntity
             StudenteEntity studente = StudenteEntity.builder()
                     .nome(credenziali.getNome().trim())
@@ -41,6 +55,10 @@ public class RegistrazioneController {
                     .password(credenziali.getPassword())
                     .codiceFiscale(credenziali.getCodiceFiscale().trim().toUpperCase())
                     .corsoDiStudi(credenziali.getCorsoDiStudi())
+                    // Nuovi campi:
+                    .dataDiNascita(dataNascitaParsed)
+                    .linkPersonale(credenziali.getLinkPersonale())
+                    .biografia(credenziali.getBiografia())
                     .provider_autenticazione("LOCAL")
                     .build();
 
@@ -49,9 +67,7 @@ public class RegistrazioneController {
 
             autenticazioneBoundary.mostraAutenticazione();
         } else {
-            PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
-            popupErroreBoundary.mostraPopup("Credenziali non valide o studente già registrato.");
-
+            new PopupErroreBoundary().mostraPopup("Credenziali non valide o studente già registrato.");
             autenticazioneBoundary.mostraAutenticazione();
         }
     }
@@ -89,5 +105,3 @@ public class RegistrazioneController {
         return codiceFiscale != null && codiceFiscale.trim().length() == 16;
     }
 }
-
-
