@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
-import it.afam.is.progetto.afam_app.boundary.EmailBoundary;
+import it.afam.is.progetto.afam_app.api.DBMSBoundary;
+import it.afam.is.progetto.afam_app.api.EmailBoundary;
 import it.afam.is.progetto.afam_app.entity.CodiceOTPEntity;
 import it.afam.is.progetto.afam_app.entity.StudenteEntity;
 import it.afam.is.progetto.afam_app.repository.StudenteRepository;

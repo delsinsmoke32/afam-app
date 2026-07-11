@@ -3,14 +3,14 @@ package it.afam.is.progetto.afam_app.gestioneaccount.control;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
+import it.afam.is.progetto.afam_app.api.DBMSBoundary;
 import it.afam.is.progetto.afam_app.entity.Sessione;
 import it.afam.is.progetto.afam_app.entity.StudenteEntity;
-import it.afam.is.progetto.afam_app.gestioneaccount.boundary.AutenticazioneBoundary;
+import it.afam.is.progetto.afam_app.autenticazione.boundary.AutenticazioneBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.FormSPIDBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.ListaProviderBoundary;
-import it.afam.is.progetto.afam_app.gestioneaccount.boundary.PaginaPersonaleBoundary;
-import it.afam.is.progetto.afam_app.gestioneaccount.boundary.PopupErroreBoundary;
+import it.afam.is.progetto.afam_app.gestione_profilo.boundary.PaginaPersonaleBoundary;
+import it.afam.is.progetto.afam_app.common.PopupErroreBoundary;
 import it.afam.is.progetto.afam_app.gestioneaccount.boundary.ProviderBoundary;
 
 public class SPIDController {

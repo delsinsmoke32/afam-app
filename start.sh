@@ -4,7 +4,7 @@ echo "Avvio database..."
 
 DB_STATUS=$(docker compose -f docker/docker-compose.yml ps --status running -q)
 
-if [[ -z "$DB_STATUS"]]; then
+if [ -z "$DB_STATUS"]; then
     docker compose -f docker/docker-compose.yml up -d
     sleep 3
 else

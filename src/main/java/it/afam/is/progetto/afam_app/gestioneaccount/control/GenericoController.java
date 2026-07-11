@@ -1,10 +1,10 @@
 package it.afam.is.progetto.afam_app.gestioneaccount.control;
 
-import it.afam.is.progetto.afam_app.boundary.DBMSBoundary;
+import it.afam.is.progetto.afam_app.api.DBMSBoundary;
 import it.afam.is.progetto.afam_app.entity.Sessione;
 import it.afam.is.progetto.afam_app.entity.StudenteEntity;
-import it.afam.is.progetto.afam_app.gestioneaccount.boundary.AutenticazioneBoundary;
-import it.afam.is.progetto.afam_app.gestioneaccount.boundary.PopupErroreBoundary;
+import it.afam.is.progetto.afam_app.autenticazione.boundary.AutenticazioneBoundary;
+import it.afam.is.progetto.afam_app.common.PopupErroreBoundary;
 
 public class GenericoController {
 
