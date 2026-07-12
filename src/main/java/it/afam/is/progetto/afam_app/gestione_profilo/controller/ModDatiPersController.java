@@ -25,8 +25,15 @@ public class ModDatiPersController {
         // <<create>> FormModDatiBoundary
         formModDatiBoundary = new FormModDatiBoundary(this);
 
-        // mostraForm()
-        formModDatiBoundary.mostraForm();
+        Long studente_id = Sessione.getStudenteId();
+
+        // Recupero i dati correnti dal database in formato mappa
+        // NOTA BENE: Se nel tuo DBMSBoundary questo metodo si chiama in un altro modo,
+        // ricordati di rinominarlo di conseguenza!
+        Map<String, String> datiCorrenti = dbmsBoundary.recuperaMappaDatiStudente(studente_id);
+
+        // mostraForm() passandogli i dati correnti per precompilare i campi
+        formModDatiBoundary.mostraForm(datiCorrenti);
     }
 
     public void mandaDati(Map<String, String> dati) {
@@ -36,37 +43,26 @@ public class ModDatiPersController {
             formModDatiBoundary = null;
         }
 
-        // verificaDati(dati)
         boolean datiIsEmpty = verificaDati(dati);
 
-        // alt : dati isEmpty
-        // [False]
         if (!datiIsEmpty) {
 
-            // validaDati(dati)
             boolean datiIsValid = validaDati(dati);
 
-            // alt : dati isValid
-            // [True]
             if (datiIsValid) {
-
                 Long studente_id = Sessione.getStudenteId();
 
                 // aggiornaDati(studente_id, dati)
                 dbmsBoundary.aggiornaDati(studente_id, dati);
 
-                // mostraGestioneProfilo()
                 gestioneProfiloBoundary.mostraGestioneProfilo();
-
             } else {
-                // [False]
                 PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
                 popupErroreBoundary.mostraPopup("Dati personali non validi.");
                 gestioneProfiloBoundary.mostraGestioneProfilo();
             }
 
         } else {
-            // ramo dati vuoti
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
             popupErroreBoundary.mostraPopup("I dati personali non possono essere tutti vuoti.");
             gestioneProfiloBoundary.mostraGestioneProfilo();
@@ -78,7 +74,6 @@ public class ModDatiPersController {
             return true;
         }
 
-        // Modificato includendo il linkPersonale nel controllo dello stato vuoto
         return isBlank(dati.get("nome"))
                 && isBlank(dati.get("cognome"))
                 && isBlank(dati.get("CdS"))
@@ -102,9 +97,6 @@ public class ModDatiPersController {
         if (isBlank(dati.get("CdS"))) {
             return false;
         }
-
-        // Nota: Il linkPersonale e la Bio rimangono opzionali per la validazione standard.
-        // Se desideri renderli obbligatori, aggiungi qui il rispettivo controllo isBlank.
 
         return true;
     }

@@ -26,8 +26,8 @@ public class FormModDatiBoundary extends JFrame {
     private JTextField nomeField;
     private JTextField cognomeField;
     private JTextField CdSField;
-    private JTextField linkPersonaleField; // Nuovo campo
-    private JTextArea bioArea; // Modificata in JTextArea
+    private JTextField linkPersonaleField;
+    private JTextArea bioArea;
 
     private Map<String, String> dati;
 
@@ -35,7 +35,8 @@ public class FormModDatiBoundary extends JFrame {
         this.modDatiPersController = modDatiPersController;
     }
 
-    public void mostraForm() {
+    // Aggiunto il parametro datiCorrenti per il pre-riempimento
+    public void mostraForm(Map<String, String> datiCorrenti) {
         setTitle("Modifica Dati Personali");
         setSize(500, 450);
         setLocationRelativeTo(null);
@@ -81,6 +82,15 @@ public class FormModDatiBoundary extends JFrame {
         panelBio.add(scrollBio, BorderLayout.CENTER);
 
         add(panelBio, BorderLayout.CENTER);
+
+        // --- PRECOMPILAZIONE DATI ESISTENTI ---
+        if (datiCorrenti != null) {
+            nomeField.setText(datiCorrenti.getOrDefault("nome", ""));
+            cognomeField.setText(datiCorrenti.getOrDefault("cognome", ""));
+            CdSField.setText(datiCorrenti.getOrDefault("CdS", ""));
+            linkPersonaleField.setText(datiCorrenti.getOrDefault("linkPersonale", ""));
+            bioArea.setText(datiCorrenti.getOrDefault("bio", ""));
+        }
 
         // --- PANNELLO BOTTONI (Sotto) ---
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));

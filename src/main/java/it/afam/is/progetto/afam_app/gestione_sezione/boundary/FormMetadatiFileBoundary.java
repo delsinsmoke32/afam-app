@@ -1,12 +1,19 @@
 package it.afam.is.progetto.afam_app.gestione_sezione.boundary;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.time.LocalDate;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import it.afam.is.progetto.afam_app.entity.AllegatoEntity;
@@ -20,7 +27,7 @@ public class FormMetadatiFileBoundary extends JFrame {
 
     private JTextField titoloField;
     private JTextField autoriField;
-    private JTextField descrizioneField;
+    private JTextArea descrizioneArea; // Cambiato da JTextField a JTextArea
     private JTextField dataCreazioneField;
 
     public FormMetadatiFileBoundary(GestioneAllegatiController gestioneAllegatiController) {
@@ -32,19 +39,19 @@ public class FormMetadatiFileBoundary extends JFrame {
     }
 
     public void mostraForm() {
-        setTitle("Metadati File");
-        costruisciForm(false);
+        costruisciForm("Metadati Nuovo File", false);
 
-        JButton salvaButton = new JButton("Salva");
+        JButton salvaButton = new JButton("Salva Metadati");
+        salvaButton.setFont(new Font("SansSerif", Font.BOLD, 12));
         salvaButton.addActionListener(e -> cliccaSalva());
 
-        aggiungiBottoneSalva(salvaButton);
+        aggiungiBottoni(salvaButton);
     }
 
     public void mostraFormMod(AllegatoEntity metadati) {
-        setTitle("Modifica Metadati File");
-        costruisciForm(true);
+        costruisciForm("Modifica Metadati File", true);
 
+        // Precompilazione dei dati se esistenti (Logica originale mantenuta)
         if (metadati != null) {
             modificaMetadati(
                     metadati.getTitoloOpera(),
@@ -53,92 +60,122 @@ public class FormMetadatiFileBoundary extends JFrame {
             );
         }
 
-        JButton salvaButton = new JButton("Salva");
+        JButton salvaButton = new JButton("Conferma Modifiche");
+        salvaButton.setFont(new Font("SansSerif", Font.BOLD, 12));
         salvaButton.addActionListener(e -> cliccaSalvaModifica());
 
-        aggiungiBottoneSalva(salvaButton);
+        aggiungiBottoni(salvaButton);
     }
 
-    private void costruisciForm(boolean modifica) {
-        setSize(500, modifica ? 230 : 260);
+    private void costruisciForm(String titoloFinestra, boolean eModifica) {
+        setTitle(titoloFinestra);
+        setSize(500, eModifica ? 420 : 480);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
 
-        JPanel panel = new JPanel(new GridLayout(modifica ? 4 : 5, 2));
+        // --- INTESTAZIONE ---
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
+        JLabel labelIntestazione = new JLabel("Inserisci o modifica i dettagli dell'allegato:");
+        labelIntestazione.setFont(new Font("SansSerif", Font.BOLD, 14));
+        topPanel.add(labelIntestazione);
+        add(topPanel, BorderLayout.NORTH);
+
+        // --- PANNELLO CENTRALE (Campi) ---
+        JPanel centerContainer = new JPanel(new BorderLayout(5, 10));
+        centerContainer.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+
+        // Griglia superiore per campi a riga singola
+        int righeGriglia = eModifica ? 2 : 3;
+        JPanel gridPanel = new JPanel(new GridLayout(righeGriglia, 2, 10, 10));
 
         titoloField = new JTextField();
         autoriField = new JTextField();
-        descrizioneField = new JTextField();
-        dataCreazioneField = new JTextField();
 
-        panel.add(new JLabel("Titolo:"));
-        panel.add(titoloField);
+        gridPanel.add(new JLabel("Titolo:"));
+        gridPanel.add(titoloField);
 
-        panel.add(new JLabel("Autori:"));
-        panel.add(autoriField);
+        gridPanel.add(new JLabel("Autori:"));
+        gridPanel.add(autoriField);
 
-        panel.add(new JLabel("Descrizione:"));
-        panel.add(descrizioneField);
-
-        if (!modifica) {
-            panel.add(new JLabel("Data creazione yyyy-MM-dd:"));
-            panel.add(dataCreazioneField);
+        if (!eModifica) {
+            dataCreazioneField = new JTextField();
+            gridPanel.add(new JLabel("Data creazione (yyyy-MM-dd):"));
+            gridPanel.add(dataCreazioneField);
         }
 
-        setContentPane(panel);
+        centerContainer.add(gridPanel, BorderLayout.NORTH);
+
+        // Area per la descrizione
+        JPanel panelDescrizione = new JPanel(new BorderLayout(5, 5));
+        panelDescrizione.add(new JLabel("Descrizione:"), BorderLayout.NORTH);
+
+        descrizioneArea = new JTextArea(5, 20);
+        descrizioneArea.setLineWrap(true);
+        descrizioneArea.setWrapStyleWord(true);
+        descrizioneArea.setFont(new Font("SansSerif", Font.PLAIN, 13));
+
+        panelDescrizione.add(new JScrollPane(descrizioneArea), BorderLayout.CENTER);
+
+        centerContainer.add(panelDescrizione, BorderLayout.CENTER);
+
+        add(centerContainer, BorderLayout.CENTER);
+    }
+
+    private void aggiungiBottoni(JButton salvaButton) {
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 10));
+        bottomPanel.setBackground(new Color(240, 240, 240));
+
+        JButton annullaButton = new JButton("Annulla");
+        annullaButton.addActionListener(e -> dispose());
+
+        bottomPanel.add(annullaButton);
+        bottomPanel.add(salvaButton);
+
+        add(bottomPanel, BorderLayout.SOUTH);
         setVisible(true);
     }
 
-    private void aggiungiBottoneSalva(JButton salvaButton) {
-        JPanel panel = (JPanel) getContentPane();
-
-        panel.add(new JLabel());
-        panel.add(salvaButton);
-
-        revalidate();
-        repaint();
-    }
+    // --- METODI DI SUPPORTO ORIGINALI MANTENUTI ---
 
     public void inserisciMetadati(String titolo, String autori, String descrizione, LocalDate dataCreazione) {
         titoloField.setText(titolo);
         autoriField.setText(autori);
-        descrizioneField.setText(descrizione);
+        descrizioneArea.setText(descrizione); // Cambiato in Area
 
-        if (dataCreazione != null) {
+        if (dataCreazione != null && dataCreazioneField != null) {
             dataCreazioneField.setText(dataCreazione.toString());
         }
     }
 
     public void modificaMetadati(String titolo, String descrizione, String autori) {
-        titoloField.setText(titolo);
-        descrizioneField.setText(descrizione);
-        autoriField.setText(autori);
+        titoloField.setText(titolo != null ? titolo : "");
+        descrizioneArea.setText(descrizione != null ? descrizione : ""); // Cambiato in Area
+        autoriField.setText(autori != null ? autori : "");
     }
 
     public void cliccaSalva() {
         String titolo = titoloField.getText();
         String autori = autoriField.getText();
-        String descrizione = descrizioneField.getText();
+        String descrizione = descrizioneArea.getText(); // Cambiato in Area
         LocalDate dataCreazione = leggiDataCreazione();
 
-        // mandaDati(titolo, autori, descrizione, dataCreazione)
         gestioneAllegatiController.mandaDati(titolo, autori, descrizione, dataCreazione);
-
         dispose();
     }
 
     public void cliccaSalvaModifica() {
         String titolo = titoloField.getText();
-        String descrizione = descrizioneField.getText();
+        String descrizione = descrizioneArea.getText(); // Cambiato in Area
         String autori = autoriField.getText();
 
-        // mandaDati(titolo, descrizione, autori)
         modificaMetadatiController.mandaDati(titolo, descrizione, autori);
-
-        dispose();
     }
 
     private LocalDate leggiDataCreazione() {
+        if (dataCreazioneField == null) return LocalDate.now();
+
         String valore = dataCreazioneField.getText();
 
         if (valore == null || valore.trim().isEmpty()) {

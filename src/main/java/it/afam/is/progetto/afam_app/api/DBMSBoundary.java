@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -282,6 +283,28 @@ public class DBMSBoundary {
         }
 
         studenteRepository.save(studente);
+    }
+
+    public Map<String, String> recuperaMappaDatiStudente(Long studente_id) {
+        Map<String, String> datiCorrenti = new HashMap<>();
+
+        // 1. Recupera lo studente dal DB.
+        // NOTA: Se il tuo metodo per cercare lo studente si chiama diversamente
+        // (es. recuperaStudente, getStudenteById), usa il nome corretto!
+        StudenteEntity studente = studenteRepository.findById(studente_id).orElse(null);
+
+        // 2. Se lo studente esiste, popoliamo la mappa con i suoi dati attuali
+        if (studente != null) {
+            datiCorrenti.put("nome", studente.getNome() != null ? studente.getNome() : "");
+            datiCorrenti.put("cognome", studente.getCognome() != null ? studente.getCognome() : "");
+
+            // Attenzione ai nomi dei getter: usa quelli che hai definito nella tua StudenteEntity
+            datiCorrenti.put("CdS", studente.getCorsoDiStudi() != null ? studente.getCorsoDiStudi() : "");
+            datiCorrenti.put("linkPersonale", studente.getLinkPersonale() != null ? studente.getLinkPersonale() : "");
+            datiCorrenti.put("bio", studente.getBiografia() != null ? studente.getBiografia() : "");
+        }
+
+        return datiCorrenti;
     }
 
     public void creaPortfolio(PortfolioEntity portfolio) {
