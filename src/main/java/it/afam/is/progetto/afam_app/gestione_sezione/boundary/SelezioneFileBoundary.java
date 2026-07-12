@@ -41,6 +41,17 @@ public class SelezioneFileBoundary extends JFrame {
     public void premiSfoglia() {
         JFileChooser fileChooser = new JFileChooser();
 
+        // <<create>> FileNameExtensionFilter per limitare la scelta visiva dell'utente
+        javax.swing.filechooser.FileNameExtensionFilter filtro =
+                new javax.swing.filechooser.FileNameExtensionFilter(
+                        "File Multimediali Consentiti (.png, .jpg, .mp3, .mp4, .pdf)",
+                        "png", "jpg", "jpeg", "mp3", "mp4", "pdf"
+                );
+
+        // Impostiamo il filtro nel selettore e disabilitiamo l'opzione "Tutti i file (*.*)"
+        fileChooser.setFileFilter(filtro);
+        fileChooser.setAcceptAllFileFilterUsed(false);
+
         int risultato = fileChooser.showOpenDialog(this);
 
         if (risultato == JFileChooser.APPROVE_OPTION) {

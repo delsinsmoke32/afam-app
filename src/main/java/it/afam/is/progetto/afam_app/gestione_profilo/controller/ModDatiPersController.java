@@ -60,31 +60,15 @@ public class ModDatiPersController {
 
             } else {
                 // [False]
-                // <<create>> PopupErroreBoundary
                 PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
-
-                // mostraPopup(testo)
                 popupErroreBoundary.mostraPopup("Dati personali non validi.");
-
-                // StudenteEntity -> PopupErroreBoundary: cliccaOK()
-                // gestito dal popup
-
-                // mostraGestioneProfilo()
                 gestioneProfiloBoundary.mostraGestioneProfilo();
             }
 
         } else {
             // ramo dati vuoti
-            // <<create>> PopupErroreBoundary
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
-
-            // mostraPopup(testo)
-            popupErroreBoundary.mostraPopup("I dati personali non possono essere vuoti.");
-
-            // StudenteEntity -> PopupErroreBoundary: cliccaOK()
-            // gestito dal popup
-
-            // mostraGestioneProfilo()
+            popupErroreBoundary.mostraPopup("I dati personali non possono essere tutti vuoti.");
             gestioneProfiloBoundary.mostraGestioneProfilo();
         }
     }
@@ -94,9 +78,11 @@ public class ModDatiPersController {
             return true;
         }
 
+        // Modificato includendo il linkPersonale nel controllo dello stato vuoto
         return isBlank(dati.get("nome"))
                 && isBlank(dati.get("cognome"))
                 && isBlank(dati.get("CdS"))
+                && isBlank(dati.get("linkPersonale"))
                 && isBlank(dati.get("bio"));
     }
 
@@ -117,6 +103,9 @@ public class ModDatiPersController {
             return false;
         }
 
+        // Nota: Il linkPersonale e la Bio rimangono opzionali per la validazione standard.
+        // Se desideri renderli obbligatori, aggiungi qui il rispettivo controllo isBlank.
+
         return true;
     }
 
@@ -124,6 +113,3 @@ public class ModDatiPersController {
         return valore == null || valore.trim().isEmpty();
     }
 }
-
-
-

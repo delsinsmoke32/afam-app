@@ -1,15 +1,17 @@
 package it.afam.is.progetto.afam_app.gestione_portfolio.boundary;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
 
 import it.afam.is.progetto.afam_app.entity.LicenzaEntity;
 import it.afam.is.progetto.afam_app.common.PopupErroreBoundary;
@@ -19,7 +21,7 @@ public class ListaGestioneLicenzaBoundary extends JFrame {
 
     private final GestioneLicenzaController gestioneLicenzaController;
 
-    private JList<LicenzaEntity> listaLicenze;
+    private JComboBox<LicenzaWrapper> comboLicenze;
     private LicenzaEntity licenzaImpostata;
 
     public ListaGestioneLicenzaBoundary(GestioneLicenzaController gestioneLicenzaController) {
@@ -27,93 +29,136 @@ public class ListaGestioneLicenzaBoundary extends JFrame {
     }
 
     public void mostraLicenzeDisponibili(List<LicenzaEntity> listaLicenzeDisponibili) {
-        setTitle("Gestione Licenza");
-        setSize(700, 400);
+        setTitle("Gestione Licenza Portfolio");
+        setSize(650, 250);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(0, 15));
 
-        JPanel panel = new JPanel(new BorderLayout());
+        // --- PANNELLO SUPERIORE (Intestazione) ---
+        JPanel topContainer = new JPanel(new BorderLayout());
+        topContainer.setBackground(new Color(240, 240, 240));
+        topContainer.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
+
+        // Pulsante Torna Indietro
+        JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        backPanel.setOpaque(false);
+        JButton btnBack = new JButton("← Annulla e Torna al Portfolio");
+        btnBack.addActionListener(e -> dispose());
+        backPanel.add(btnBack);
+        topContainer.add(backPanel, BorderLayout.NORTH);
+
+        // Titolo informativo
+        JLabel lblTitolo = new JLabel("Seleziona la licenza d'uso per le tue opere:");
+        lblTitolo.setFont(new Font("SansSerif", Font.BOLD, 16));
+        lblTitolo.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        topContainer.add(lblTitolo, BorderLayout.CENTER);
+
+        add(topContainer, BorderLayout.NORTH);
+
+        // --- PANNELLO CENTRALE (Pannello Contenitore ComboBox) ---
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 
         if (listaLicenzeDisponibili == null || listaLicenzeDisponibili.isEmpty()) {
-            panel.add(new JLabel("Nessuna licenza disponibile."), BorderLayout.CENTER);
-            setContentPane(panel);
+            centerPanel.add(new JLabel("Nessuna licenza disponibile nel sistema.", JLabel.CENTER), BorderLayout.CENTER);
+            add(centerPanel, BorderLayout.CENTER);
             setVisible(true);
             return;
         }
 
-        listaLicenze = new JList<>(listaLicenzeDisponibili.toArray(new LicenzaEntity[0]));
-        listaLicenze.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        // Popoliamo la JComboBox usando una classe Wrapper interna per una visualizzazione corretta
+        comboLicenze = new JComboBox<>();
+        LicenzaWrapper elementoSelezionato = null;
 
-        listaLicenze.setCellRenderer((list, value, index, isSelected, cellHasFocus) -> {
-            JLabel label = new JLabel(testoLicenza(value));
-            label.setOpaque(true);
+        for (LicenzaEntity licenza : listaLicenzeDisponibili) {
+            LicenzaWrapper wrapper = new LicenzaWrapper(licenza);
+            comboLicenze.addItem(wrapper);
 
+            // Se questa licenza è quella attualmente impostata nel portfolio, la teniamo a mente
             if (licenzaImpostata != null
-                    && value != null
-                    && value.getId() != null
-                    && value.getId().equals(licenzaImpostata.getId())) {
-                label.setText("[ATTUALE] " + testoLicenza(value));
+                    && licenza.getId() != null
+                    && licenza.getId().equals(licenzaImpostata.getId())) {
+                elementoSelezionato = wrapper;
             }
+        }
 
-            if (isSelected) {
-                label.setBackground(list.getSelectionBackground());
-                label.setForeground(list.getSelectionForeground());
-            } else {
-                label.setBackground(list.getBackground());
-                label.setForeground(list.getForeground());
-            }
+        // Se abbiamo trovato la licenza attuale, forziamo la ComboBox a preselezionarla
+        if (elementoSelezionato != null) {
+            comboLicenze.setSelectedItem(elementoSelezionato);
+        }
 
-            return label;
-        });
+        comboLicenze.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        centerPanel.add(comboLicenze, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
 
-        JButton selezionaButton = new JButton("Seleziona licenza");
-        selezionaButton.addActionListener(e -> selezionaLicenza());
+        // --- PANNELLO INFERIORE (Salvataggio) ---
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 15));
+        bottomPanel.setBackground(new Color(230, 230, 230));
 
-        JPanel panelBottoni = new JPanel();
-        panelBottoni.add(selezionaButton);
+        JButton salvaButton = new JButton("Salva Licenza");
+        salvaButton.setFont(new Font("SansSerif", Font.BOLD, 13));
+        salvaButton.addActionListener(e -> selezionaLicenza());
+        bottomPanel.add(salvaButton);
 
-        panel.add(new JScrollPane(listaLicenze), BorderLayout.CENTER);
-        panel.add(panelBottoni, BorderLayout.SOUTH);
+        add(bottomPanel, BorderLayout.SOUTH);
 
-        setContentPane(panel);
         setVisible(true);
     }
 
     public void evidenziaLicenzaImpostata(LicenzaEntity licenza) {
         this.licenzaImpostata = licenza;
 
-        if (listaLicenze != null) {
-            listaLicenze.repaint();
+        // Se la finestra è già visibile, riaggiorna la selezione nella ComboBox
+        if (comboLicenze != null) {
+            for (int i = 0; i < comboLicenze.getItemCount(); i++) {
+                LicenzaWrapper wrapper = comboLicenze.getItemAt(i);
+                if (wrapper != null && wrapper.getLicenza().getId().equals(licenza.getId())) {
+                    comboLicenze.setSelectedItem(wrapper);
+                    break;
+                }
+            }
         }
     }
 
     public void selezionaLicenza() {
-        if (listaLicenze == null) {
+        if (comboLicenze == null) {
             return;
         }
 
-        LicenzaEntity licenza = listaLicenze.getSelectedValue();
+        LicenzaWrapper wrapper = (LicenzaWrapper) comboLicenze.getSelectedItem();
 
-        if (licenza == null || licenza.getId() == null) {
+        if (wrapper == null || wrapper.getLicenza() == null || wrapper.getLicenza().getId() == null) {
             PopupErroreBoundary popupErroreBoundary = new PopupErroreBoundary();
-            popupErroreBoundary.mostraPopup("Seleziona una licenza.");
+            popupErroreBoundary.mostraPopup("Seleziona una licenza valida dalla lista.");
             return;
         }
 
-        Long licenza_id = licenza.getId();
+        Long licenza_id = wrapper.getLicenza().getId();
 
-        // scegliLicenza(licenza_id)
+        // Invia l'ID selezionato al controller originale, mantenendo la compatibilità totale
         gestioneLicenzaController.scegliLicenza(licenza_id);
     }
 
-    private String testoLicenza(LicenzaEntity licenza) {
-        if (licenza == null) {
-            return "";
+    // --- CLASSE WRAPPER INTERNA ---
+    // Serve a definire in che modo la JComboBox converte l'entità complessa in stringa leggibile
+    private static class LicenzaWrapper {
+        private final LicenzaEntity licenza;
+
+        public LicenzaWrapper(LicenzaEntity licenza) {
+            this.licenza = licenza;
         }
 
-        String nome = licenza.getNome() != null ? licenza.getNome() : "";
-        String descrizione = licenza.getDescrizione() != null ? licenza.getDescrizione() : "";
+        public LicenzaEntity getLicenza() {
+            return licenza;
+        }
 
-        return nome + " - " + descrizione;
+        @Override
+        public String toString() {
+            if (licenza == null) return "";
+            String nome = licenza.getNome() != null ? licenza.getNome() : "";
+            String descrizione = licenza.getDescrizione() != null ? licenza.getDescrizione() : "";
+            return nome + " (" + descrizione + ")";
+        }
     }
 }

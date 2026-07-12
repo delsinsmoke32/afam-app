@@ -52,7 +52,7 @@ public class PaginaPersonaleBoundary extends JFrame {
 
     public void cliccaGestioneProfilo() {
         GestioneProfiloBoundary gestioneProfiloBoundary =
-                new GestioneProfiloBoundary(autenticazioneBoundary, dbmsBoundary);
+                new GestioneProfiloBoundary(this, autenticazioneBoundary, dbmsBoundary);
 
         gestioneProfiloBoundary.mostraGestioneProfilo();
     }

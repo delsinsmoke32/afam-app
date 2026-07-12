@@ -1,16 +1,20 @@
 package it.afam.is.progetto.afam_app.gestione_sezione.boundary;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.GridLayout;
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
 
 import it.afam.is.progetto.afam_app.api.DBMSBoundary;
 import it.afam.is.progetto.afam_app.api.FileStorageBoundary;
 import it.afam.is.progetto.afam_app.entity.AllegatoEntity;
+import it.afam.is.progetto.afam_app.entity.SezioneEntity;
 import it.afam.is.progetto.afam_app.gestione_sezione.controller.CancellazioneFileController;
 import it.afam.is.progetto.afam_app.gestione_sezione.controller.GestioneAllegatiController;
 import it.afam.is.progetto.afam_app.gestione_sezione.controller.ModificaDescrizioneSezController;
@@ -21,6 +25,12 @@ public class VisualizzaSezioneBoundary extends JFrame {
     private final DBMSBoundary dbmsBoundary;
     private final FileStorageBoundary fileStorageBoundary;
     private final Long sezione_id;
+
+    private JTable tabellaAllegati;
+    private AllegatoTableModel tableModel;
+    private JTextArea dettagliArea;
+    private JButton btnEliminaFile;
+    private JButton btnModificaMetadati;
 
     public VisualizzaSezioneBoundary(
             DBMSBoundary dbmsBoundary,
@@ -33,93 +43,189 @@ public class VisualizzaSezioneBoundary extends JFrame {
     }
 
     public void mostraSezioneInit(List<AllegatoEntity> listaAllegati) {
-        setTitle("Visualizza Sezione");
-        setSize(700, 560);
+        // Recuperiamo l'intera sezione per avere Titolo e Descrizione corretti
+        SezioneEntity sezione = dbmsBoundary.cercaSezione(sezione_id);
+        String titoloSezione = (sezione != null && sezione.getTitolo() != null) ? sezione.getTitolo() : "Sconosciuta";
+        String descSezione = (sezione != null && sezione.getCorpoTesto() != null) ? sezione.getCorpoTesto() : "Nessuna descrizione disponibile.";
+
+        setTitle("Gestione Sezione - " + titoloSezione);
+        setSize(950, 550);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        JPanel panel = new JPanel(new GridLayout(0, 1));
+        // --- PANNELLO SUPERIORE (Intestazione) ---
+        JPanel topContainer = new JPanel(new BorderLayout(0, 10));
+        topContainer.setBackground(new Color(240, 240, 240));
+        topContainer.setBorder(BorderFactory.createEmptyBorder(10, 15, 15, 15));
 
-        panel.add(new JLabel("Visualizza Sezione"));
+        // Bottone Indietro
+        JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        backPanel.setOpaque(false);
+        JButton btnBack = new JButton("← Torna a Visualizza Portfolio");
+        btnBack.addActionListener(e -> dispose());
+        backPanel.add(btnBack);
+        topContainer.add(backPanel, BorderLayout.NORTH);
 
-        String descrizione = dbmsBoundary.recuperaDescrizioneSezione(sezione_id);
-        panel.add(new JLabel("Descrizione: " + (descrizione != null ? descrizione : "")));
+        // Titolo e Descrizione Sezione
+        JPanel headerPanel = new JPanel(new GridLayout(2, 1, 0, 5));
+        headerPanel.setOpaque(false);
 
-        JButton modificaDescrizioneButton = new JButton("Modifica descrizione");
-        modificaDescrizioneButton.addActionListener(e -> cliccaModificaDescrizione());
+        JLabel lblTitolo = new JLabel("Sezione: " + titoloSezione);
+        lblTitolo.setFont(new Font("SansSerif", Font.BOLD, 18));
 
-        JButton uploadButton = new JButton("Upload file");
-        uploadButton.addActionListener(e -> cliccaUploadFile());
+        JLabel lblDescrizione = new JLabel("Descrizione: " + descSezione);
+        lblDescrizione.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        panel.add(modificaDescrizioneButton);
-        panel.add(uploadButton);
+        headerPanel.add(lblTitolo);
+        headerPanel.add(lblDescrizione);
+        topContainer.add(headerPanel, BorderLayout.CENTER);
 
-        panel.add(new JLabel("Allegati:"));
+        add(topContainer, BorderLayout.NORTH);
 
-        if (listaAllegati == null || listaAllegati.isEmpty()) {
-            panel.add(new JLabel("Nessun allegato presente."));
-        } else {
-            for (AllegatoEntity allegato : listaAllegati) {
-                JLabel allegatoLabel = new JLabel(
-                        "- " + allegato.getTitoloOpera() + " (" + allegato.getNomeFile() + ")"
-                );
+        // --- PANNELLO CENTRALE (SplitPane con Tabella e Dettagli) ---
 
-                JButton modificaButton = new JButton("Modifica metadati");
-                modificaButton.addActionListener(e -> cliccaModificaMetadati(allegato.getId()));
+        // Sinistra: Tabella Allegati
+        tableModel = new AllegatoTableModel(listaAllegati);
+        tabellaAllegati = new JTable(tableModel);
+        tabellaAllegati.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tabellaAllegati.setRowHeight(30);
+        tabellaAllegati.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
+        tabellaAllegati.setFont(new Font("SansSerif", Font.PLAIN, 13));
 
-                JButton eliminaButton = new JButton("Elimina file");
-                eliminaButton.addActionListener(e -> cliccaEliminaFile(allegato.getId()));
+        JScrollPane tableScrollPane = new JScrollPane(tabellaAllegati);
 
-                panel.add(allegatoLabel);
-                panel.add(modificaButton);
-                panel.add(eliminaButton);
+        // Destra: Area Dettagli Allegato
+        dettagliArea = new JTextArea();
+        dettagliArea.setEditable(false);
+        dettagliArea.setLineWrap(true);
+        dettagliArea.setWrapStyleWord(true);
+        dettagliArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
+        dettagliArea.setBackground(new Color(245, 245, 245));
+        dettagliArea.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JScrollPane dettagliScroll = new JScrollPane(dettagliArea);
+        dettagliScroll.setBorder(BorderFactory.createTitledBorder("Dettagli Allegato Selezionato"));
+
+        // Split Pane
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tableScrollPane, dettagliScroll);
+        splitPane.setDividerLocation(600); // La tabella prende più spazio
+        splitPane.setResizeWeight(0.7);
+        add(splitPane, BorderLayout.CENTER);
+
+        // --- PANNELLO INFERIORE (Barra dei bottoni) ---
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        bottomPanel.setBackground(new Color(235, 235, 235));
+
+        JButton btnAggiungiAllegato = new JButton("Aggiungi Allegato");
+        btnEliminaFile = new JButton("Cancella Allegato");
+        btnEliminaFile.setIcon(UIManager.getIcon("FileView.trashIcon"));
+        JButton btnModificaDescSezione = new JButton("Modifica Descrizione Sezione");
+        btnModificaMetadati = new JButton("Modifica Metadati Allegato");
+
+        // Disabilitati di default (si attivano cliccando un file nella tabella)
+        btnEliminaFile.setEnabled(false);
+        btnModificaMetadati.setEnabled(false);
+
+        bottomPanel.add(btnAggiungiAllegato);
+        bottomPanel.add(btnEliminaFile);
+        bottomPanel.add(btnModificaDescSezione);
+        bottomPanel.add(btnModificaMetadati);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // --- GESTIONE EVENTI ---
+
+        // Aggiorna pannello dettagli quando si seleziona una riga
+        tabellaAllegati.getSelectionModel().addListSelectionListener(e -> {
+            int selectedRow = tabellaAllegati.getSelectedRow();
+            if (selectedRow >= 0) {
+                btnEliminaFile.setEnabled(true);
+                btnModificaMetadati.setEnabled(true);
+                AllegatoEntity allegato = tableModel.getAllegatoAt(selectedRow);
+                mostraDettagliAllegato(allegato);
+            } else {
+                btnEliminaFile.setEnabled(false);
+                btnModificaMetadati.setEnabled(false);
+                dettagliArea.setText("");
             }
-        }
+        });
 
-        setContentPane(panel);
-        revalidate();
-        repaint();
+        // Azioni Bottoni
+        btnAggiungiAllegato.addActionListener(e -> cliccaUploadFile());
+        btnModificaDescSezione.addActionListener(e -> cliccaModificaDescrizione());
+
+        btnEliminaFile.addActionListener(e -> {
+            int row = tabellaAllegati.getSelectedRow();
+            if (row >= 0) {
+                cliccaEliminaFile(tableModel.getAllegatoAt(row).getId());
+            }
+        });
+
+        btnModificaMetadati.addActionListener(e -> {
+            int row = tabellaAllegati.getSelectedRow();
+            if (row >= 0) {
+                cliccaModificaMetadati(tableModel.getAllegatoAt(row).getId());
+            }
+        });
+
         setVisible(true);
     }
 
-    public void mostraSezione() {
-        List<AllegatoEntity> listaAllegati = dbmsBoundary.recuperaAllegati(sezione_id);
-        mostraSezioneInit(listaAllegati);
+    private void mostraDettagliAllegato(AllegatoEntity allegato) {
+        StringBuilder sb = new StringBuilder();
+
+        String tipo = estraiEstensione(allegato.getNomeFile());
+        if (tipo.isEmpty() && allegato.getTipoFile() != null) tipo = allegato.getTipoFile();
+
+        sb.append("Tipo: ").append(tipo.toUpperCase()).append("\n");
+        sb.append("Titolo: ").append(allegato.getTitoloOpera() != null ? allegato.getTitoloOpera() : "Sconosciuto").append("\n");
+        sb.append("Autori: ").append(allegato.getAutoreOpera() != null ? allegato.getAutoreOpera() : "N/A").append("\n");
+        sb.append("Data: ").append(allegato.getDataCreazione() != null ? allegato.getDataCreazione().toString() : "N/A").append("\n");
+        sb.append("Descrizione: ").append(allegato.getDescrizioneBreve() != null ? allegato.getDescrizioneBreve() : "Nessuna descrizione presente.");
+
+        dettagliArea.setText(sb.toString());
     }
 
+    private String estraiEstensione(String nomeFile) {
+        if (nomeFile != null && nomeFile.contains(".")) {
+            return nomeFile.substring(nomeFile.lastIndexOf(".") + 1);
+        }
+        return "";
+    }
+
+    public void mostraSezione() {
+        // Ricarichiamo pulendo il pannello
+        List<AllegatoEntity> listaAllegati = dbmsBoundary.recuperaAllegati(sezione_id);
+        getContentPane().removeAll();
+        mostraSezioneInit(listaAllegati);
+        revalidate();
+        repaint();
+    }
+
+    // --- CHIAMATE AL CONTROLLER (invariate) ---
+
     public void cliccaUploadFile() {
-        // <<create>> GestioneAllegatiController
         GestioneAllegatiController gestioneAllegatiController =
                 new GestioneAllegatiController(this, dbmsBoundary, fileStorageBoundary);
-
-        // richiediUpload(sezione_id)
         gestioneAllegatiController.richiediUpload(sezione_id);
     }
 
     public void cliccaModificaDescrizione() {
-        // <<create>> ModificaDescrizioneController
         ModificaDescrizioneSezController modificaDescrizioneSezController =
                 new ModificaDescrizioneSezController(this, dbmsBoundary);
-
-        // richiediModificaDescrizione(sezione_id)
         modificaDescrizioneSezController.richiediModificaDescrizione(sezione_id);
     }
 
     public void cliccaModificaMetadati(Long allegato_id) {
-        // <<create>> ModificaMetadatiController
         ModificaMetadatiController modificaMetadatiController =
                 new ModificaMetadatiController(this, dbmsBoundary);
-
-        // richiediModificaMetadati(allegato_id)
         modificaMetadatiController.richiediModificaMetadati(allegato_id);
     }
 
     public void cliccaEliminaFile(Long allegato_id) {
-        // <<create>> CancellazioneFileController
         CancellazioneFileController cancellazioneFileController =
                 new CancellazioneFileController(this, dbmsBoundary, fileStorageBoundary);
-
-        // richiediCancellazioneFile(allegato_id)
         cancellazioneFileController.richiediCancellazioneFile(allegato_id);
     }
 
@@ -133,5 +239,46 @@ public class VisualizzaSezioneBoundary extends JFrame {
 
     public void mostraSezionePrecedente() {
         mostraSezione();
+    }
+
+    // --- TABLE MODEL PERSONALIZZATO ---
+
+    private class AllegatoTableModel extends AbstractTableModel {
+        private final String[] columnNames = {"Tipo", "Titolo Allegato", "Autori", "Data"};
+        private final List<AllegatoEntity> data;
+
+        public AllegatoTableModel(List<AllegatoEntity> data) {
+            this.data = data != null ? data : new ArrayList<>();
+        }
+
+        @Override
+        public int getRowCount() { return data.size(); }
+
+        @Override
+        public int getColumnCount() { return columnNames.length; }
+
+        @Override
+        public String getColumnName(int column) { return columnNames[column]; }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            AllegatoEntity a = data.get(rowIndex);
+            switch (columnIndex) {
+                case 0:
+                    return estraiEstensione(a.getNomeFile()).toUpperCase();
+                case 1:
+                    return a.getTitoloOpera() != null ? a.getTitoloOpera() : a.getNomeFile();
+                case 2:
+                    return a.getAutoreOpera() != null ? a.getAutoreOpera() : "";
+                case 3:
+                    return a.getDataCreazione() != null ? a.getDataCreazione().toString() : "";
+                default:
+                    return null;
+            }
+        }
+
+        public AllegatoEntity getAllegatoAt(int rowIndex) {
+            return data.get(rowIndex);
+        }
     }
 }

@@ -200,6 +200,7 @@ public class DBMSBoundary {
             studente.setCognome(dati.get("cognome"));
             studente.setCorsoDiStudi(dati.get("CdS"));
             studente.setBiografia(dati.get("bio"));
+            studente.setLinkPersonale(dati.get("linkPersonale"));
 
             studenteRepository.save(studente);
         });
@@ -293,6 +294,34 @@ public class DBMSBoundary {
         }
 
         portfolioRepository.save(portfolio);
+    }
+
+    // --- METODI PER LA MODIFICA DELLA DESCRIZIONE DEL PORTFOLIO ---
+
+    public String recuperaDescrizionePortfolio(Long portfolio_id) {
+        // Usa il metodo che hai già per recuperare il portfolio
+        PortfolioEntity portfolio = recuperaPortfolio(portfolio_id);
+
+        if (portfolio != null) {
+            return portfolio.getDescrizione();
+        }
+        return null;
+    }
+
+    public void aggiornaDescrizionePort(Long portfolio_id, String descrizione) {
+        // 1. Recuperiamo il portfolio dal DB
+        PortfolioEntity portfolio = recuperaPortfolio(portfolio_id);
+
+        if (portfolio != null) {
+            // 2. Modifichiamo la descrizione
+            portfolio.setDescrizione(descrizione);
+
+            // 3. Salviamo le modifiche nel database.
+            // NOTA: Se il tuo metodo per salvare nel DB si chiama in modo diverso
+            // (es. salvaModifichePortfolio o updatePortfolio), usa quello!
+            // Esempio generico:
+            portfolioRepository.save(portfolio);
+        }
     }
 
     public void inserisciSezione(SezioneEntity sezione) {

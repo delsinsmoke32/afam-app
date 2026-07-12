@@ -80,7 +80,21 @@ public class GestioneAllegatiController {
 
         Path path = Path.of(percorsoFile);
 
-        return Files.exists(path) && Files.isRegularFile(path);
+        // Verifichiamo prima di tutto che il file esista e sia un file regolare
+        if (!Files.exists(path) || !Files.isRegularFile(path)) {
+            return false;
+        }
+
+        // Estraiamo l'estensione convertendola in minuscolo
+        String nomeFile = path.getFileName().toString().toLowerCase();
+
+        // Controlliamo se finisce con una delle estensioni consentite
+        return nomeFile.endsWith(".png")  ||
+                nomeFile.endsWith(".jpg")  ||
+                nomeFile.endsWith(".jpeg") ||
+                nomeFile.endsWith(".mp3")  ||
+                nomeFile.endsWith(".mp4")  ||
+                nomeFile.endsWith(".pdf");
     }
 
     public void mandaDati(String titolo, String autori, String descrizione, LocalDate dataCreazione) {

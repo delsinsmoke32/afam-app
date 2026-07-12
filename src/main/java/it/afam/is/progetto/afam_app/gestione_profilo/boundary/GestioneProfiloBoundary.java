@@ -20,10 +20,16 @@ public class GestioneProfiloBoundary extends JFrame {
     private final AutenticazioneBoundary autenticazioneBoundary;
     private final DBMSBoundary dbmsBoundary;
 
+    // Riferimento alla pagina personale per poterla chiudere al logout
+    private final PaginaPersonaleBoundary paginaPersonaleBoundary;
+
+    // Costruttore aggiornato che accetta la PaginaPersonaleBoundary
     public GestioneProfiloBoundary(
+            PaginaPersonaleBoundary paginaPersonaleBoundary,
             AutenticazioneBoundary autenticazioneBoundary,
             DBMSBoundary dbmsBoundary
     ) {
+        this.paginaPersonaleBoundary = paginaPersonaleBoundary;
         this.autenticazioneBoundary = autenticazioneBoundary;
         this.dbmsBoundary = dbmsBoundary;
     }
@@ -60,7 +66,13 @@ public class GestioneProfiloBoundary extends JFrame {
 
         logoutButton.addActionListener(e -> {
             cliccaLogout();
-            dispose();
+
+            // FIX: Se il riferimento alla pagina personale esiste, la chiudiamo forzatamente
+            if (paginaPersonaleBoundary != null) {
+                paginaPersonaleBoundary.dispose();
+            }
+
+            dispose(); // Chiude la finestra corrente di Gestione Profilo
         });
 
         chiudiButton.addActionListener(e -> dispose());
@@ -72,39 +84,28 @@ public class GestioneProfiloBoundary extends JFrame {
     }
 
     public void cliccaModificaDati() {
-        // <<create>> ModDatiPersController
         new ModDatiPersController(this, dbmsBoundary);
     }
 
     public void cliccaModificaPassword() {
-        // <<create>> ModificaPwdController
         new ModificaPwdController(this, dbmsBoundary);
     }
 
     public void cliccaEliminaAccount() {
-        // <<create>> CancProfController
         new CancProfController(this, autenticazioneBoundary, dbmsBoundary);
     }
 
     public void cliccaRevocaURL() {
-        // <<create>> RevocaURLController
         new RevocaURLController(this, dbmsBoundary);
     }
 
     public void cliccaConsultaStatistiche() {
-        // <<create>> CSAController
         CSAController csaController = new CSAController(this, dbmsBoundary);
-
-        // recuperaDati()
-        // già chiamato nel costruttore del controller
     }
 
     public void cliccaLogout() {
-        // <<create>> GestioneProfiloController
         GestioneProfiloController gestioneProfiloController =
                 new GestioneProfiloController(autenticazioneBoundary);
-
-        // logout()
         gestioneProfiloController.logout();
     }
 }

@@ -1,13 +1,15 @@
 package it.afam.is.progetto.afam_app.gestione_portfolio.boundary;
 
-import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
 
 import it.afam.is.progetto.afam_app.api.DBMSBoundary;
 import it.afam.is.progetto.afam_app.api.FileStorageBoundary;
@@ -18,6 +20,7 @@ import it.afam.is.progetto.afam_app.gestione_portfolio.controller.CancellaSezion
 import it.afam.is.progetto.afam_app.gestione_portfolio.controller.GestioneLicenzaController;
 import it.afam.is.progetto.afam_app.gestione_portfolio.controller.GestioneVisibilitaPortController;
 import it.afam.is.progetto.afam_app.gestione_portfolio.controller.InserimentoSezioneController;
+import it.afam.is.progetto.afam_app.gestione_portfolio.controller.ModificaDescrizionePortController;
 import it.afam.is.progetto.afam_app.gestione_portfolio.controller.OrdinamentoSezioniController;
 import it.afam.is.progetto.afam_app.gestione_sezione.controller.VisualizzaSezioneController;
 
@@ -26,6 +29,10 @@ public class VisualizzaPortfolioBoundary extends JFrame {
     private final DBMSBoundary dbmsBoundary;
     private final FileStorageBoundary fileStorageBoundary;
     private final Long portfolio_id;
+
+    private JTable tabellaSezioni;
+    private SezioneTableModel tableModel;
+    private JButton btnVisualizzaSezione;
 
     public VisualizzaPortfolioBoundary(DBMSBoundary dbmsBoundary, Long portfolio_id) {
         this.dbmsBoundary = dbmsBoundary;
@@ -44,64 +51,112 @@ public class VisualizzaPortfolioBoundary extends JFrame {
     }
 
     public void mostraPortfolioInit(PortfolioEntity portfolio, List<SezioneEntity> sezioniPortfolio) {
-        setTitle("Visualizza Portfolio");
-        setSize(700, 700);
+        setTitle("Gestione Portfolio - " + portfolio.getTitolo());
+        setSize(1000, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(0, 10)); // Gap verticale
 
-        JPanel panel = new JPanel(new GridLayout(0, 1));
+        // --- PANNELLO SUPERIORE (Intestazione) ---
+        JPanel topContainer = new JPanel(new BorderLayout());
+        topContainer.setBackground(new Color(240, 240, 240));
+        topContainer.setBorder(BorderFactory.createEmptyBorder(10, 15, 15, 15));
 
-        panel.add(new JLabel("Portfolio: " + portfolio.getTitolo()));
-        panel.add(new JLabel("Descrizione: " + portfolio.getDescrizione()));
+        // Bottone Indietro
+        JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        backPanel.setOpaque(false);
+        JButton btnBack = new JButton("← Torna alla Gestione Portfolio");
+        btnBack.addActionListener(e -> dispose());
+        backPanel.add(btnBack);
+        topContainer.add(backPanel, BorderLayout.NORTH);
 
-        JButton aggiungiSezioneButton = new JButton("Aggiungi nuova sezione");
-        aggiungiSezioneButton.addActionListener(e -> selezionaInserisciNuovaSezione());
+        // Titolo, Descrizione e Bottone Modifica
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 15));
+        headerPanel.setOpaque(false);
 
-        JButton eliminaSezioneButton = new JButton("Elimina sezione");
-        eliminaSezioneButton.addActionListener(e -> cliccaEliminaSezione());
+        JLabel lblTitolo = new JLabel("Portfolio: " + portfolio.getTitolo());
+        lblTitolo.setFont(new Font("SansSerif", Font.BOLD, 22));
 
-        JButton condividiPortfolioButton = new JButton("Condividi portfolio");
-        condividiPortfolioButton.addActionListener(e -> mostraCondivisioneCandidatura());
+        String descrizioneTesto = portfolio.getDescrizione() != null ? portfolio.getDescrizione() : "Nessuna descrizione";
+        JLabel lblDescrizione = new JLabel("|   Descrizione: " + descrizioneTesto);
+        lblDescrizione.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        JButton gestioneLicenzeButton = new JButton("Gestione licenze");
-        gestioneLicenzeButton.addActionListener(e -> cliccaGestioneLicenze());
+        JButton btnModificaDescrizione = new JButton("Modifica Descrizione");
+        btnModificaDescrizione.setFocusPainted(false);
+        btnModificaDescrizione.addActionListener(e -> cliccaModificaDescrizione());
 
-        JButton gestioneVisibilitaSezioniButton = new JButton("Gestione visibilità sezioni");
-        gestioneVisibilitaSezioniButton.addActionListener(e -> cliccaGestioneVisibilitaSezioni());
+        headerPanel.add(lblTitolo);
+        headerPanel.add(lblDescrizione);
+        headerPanel.add(btnModificaDescrizione); // Posizionato esattamente qui come nel mockup
+        topContainer.add(headerPanel, BorderLayout.CENTER);
 
-        JButton ordinamentoSezioniButton = new JButton("Ordinamento sezioni");
-        ordinamentoSezioniButton.addActionListener(e -> selezionaOrdinamentoSezioni());
+        add(topContainer, BorderLayout.NORTH);
 
-        panel.add(aggiungiSezioneButton);
-        panel.add(eliminaSezioneButton);
-        panel.add(condividiPortfolioButton);
-        panel.add(gestioneLicenzeButton);
-        panel.add(gestioneVisibilitaSezioniButton);
-        panel.add(ordinamentoSezioniButton);
-
-        panel.add(new JLabel("Sezioni:"));
-
-        if (sezioniPortfolio == null || sezioniPortfolio.isEmpty()) {
-            panel.add(new JLabel("Nessuna sezione presente."));
-        } else {
+        // --- PANNELLO CENTRALE (Tabella JTable) ---
+        if (sezioniPortfolio != null) {
             sezioniPortfolio.sort(Comparator.comparing(
-                    sezione -> sezione.getOrdineVisualizzazione() != null
-                            ? sezione.getOrdineVisualizzazione()
-                            : 0
+                    sezione -> sezione.getOrdineVisualizzazione() != null ? sezione.getOrdineVisualizzazione() : 0
             ));
-
-            for (SezioneEntity sezione : sezioniPortfolio) {
-                String stato = Boolean.TRUE.equals(sezione.getIsPubblica()) ? "pubblica" : "non pubblica";
-
-                JButton sezioneButton = new JButton(sezione.getTitolo() + " (" + stato + ")");
-                sezioneButton.addActionListener(e -> cliccaVisualizzaSezione(sezione.getId()));
-                panel.add(sezioneButton);
-            }
         }
 
-        setContentPane(panel);
-        revalidate();
-        repaint();
+        tableModel = new SezioneTableModel(sezioniPortfolio);
+        tabellaSezioni = new JTable(tableModel);
+        tabellaSezioni.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tabellaSezioni.setRowHeight(35);
+        tabellaSezioni.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
+        tabellaSezioni.setFont(new Font("SansSerif", Font.PLAIN, 14));
+
+        JScrollPane scrollPane = new JScrollPane(tabellaSezioni);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
+        add(scrollPane, BorderLayout.CENTER);
+
+        // --- PANNELLO INFERIORE (Barra dei bottoni) ---
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
+        bottomPanel.setBackground(new Color(230, 230, 230));
+
+        btnVisualizzaSezione = new JButton("Visualizza Sezione");
+        btnVisualizzaSezione.setEnabled(false); // Disabilitato se non c'è una riga selezionata
+
+        JButton btnAggiungiSezione = new JButton("Aggiungi Sezione");
+        JButton btnRimuoviSezione = new JButton("Rimuovi Sezione");
+        JButton btnGestisciVisibilita = new JButton("Gestisci Visibilità");
+        JButton btnGestisciLicenza = new JButton("Gestisci Licenza");
+        JButton btnOrdinaSezioni = new JButton("Ordina Sezioni");
+        JButton btnCondividi = new JButton("Condividi Portfolio");
+
+        // Aggiunta componenti al pannello inferiore
+        bottomPanel.add(btnVisualizzaSezione);
+        bottomPanel.add(btnAggiungiSezione);
+        bottomPanel.add(btnRimuoviSezione);
+        bottomPanel.add(btnGestisciVisibilita);
+        bottomPanel.add(btnGestisciLicenza);
+        bottomPanel.add(btnOrdinaSezioni);
+        bottomPanel.add(btnCondividi);
+
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        // --- GESTIONE EVENTI ---
+
+        // Abilita il bottone "Visualizza Sezione" solo quando viene selezionata una riga
+        tabellaSezioni.getSelectionModel().addListSelectionListener(e -> {
+            btnVisualizzaSezione.setEnabled(tabellaSezioni.getSelectedRow() >= 0);
+        });
+
+        btnVisualizzaSezione.addActionListener(e -> {
+            int selectedRow = tabellaSezioni.getSelectedRow();
+            if (selectedRow >= 0) {
+                Long idSezione = tableModel.getSezioneAt(selectedRow).getId();
+                cliccaVisualizzaSezione(idSezione);
+            }
+        });
+
+        btnAggiungiSezione.addActionListener(e -> selezionaInserisciNuovaSezione());
+        btnRimuoviSezione.addActionListener(e -> cliccaEliminaSezione()); // Apre il suo dialog dal controller
+        btnCondividi.addActionListener(e -> mostraCondivisioneCandidatura());
+        btnGestisciLicenza.addActionListener(e -> cliccaGestioneLicenze());
+        btnGestisciVisibilita.addActionListener(e -> cliccaGestioneVisibilitaSezioni());
+        btnOrdinaSezioni.addActionListener(e -> selezionaOrdinamentoSezioni());
+
         setVisible(true);
     }
 
@@ -118,7 +173,11 @@ public class VisualizzaPortfolioBoundary extends JFrame {
         List<SezioneEntity> sezioniPortfolio = dbmsBoundary.recuperaSezioniPortfolio(portfolio_id);
 
         if (portfolio != null) {
+            // Rimuoviamo tutto dal frame prima di ricrearlo
+            getContentPane().removeAll();
             mostraPortfolioInit(portfolio, sezioniPortfolio);
+            revalidate();
+            repaint();
         } else {
             mostraPortfolioFallback();
         }
@@ -126,97 +185,72 @@ public class VisualizzaPortfolioBoundary extends JFrame {
 
     private void mostraPortfolioFallback() {
         setTitle("Visualizza Portfolio");
-        setSize(450, 430);
+        setSize(500, 200);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
 
-        JPanel panel = new JPanel(new GridLayout(0, 1));
+        JLabel errorLabel = new JLabel("Errore: Portfolio non trovato.", SwingConstants.CENTER);
+        errorLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
+        add(errorLabel, BorderLayout.CENTER);
 
-        JLabel titolo = new JLabel("Visualizza Portfolio");
+        JPanel bottomPanel = new JPanel();
+        JButton btnChiudi = new JButton("Chiudi");
+        btnChiudi.addActionListener(e -> dispose());
+        bottomPanel.add(btnChiudi);
+        add(bottomPanel, BorderLayout.SOUTH);
 
-        JButton aggiungiSezioneButton = new JButton("Aggiungi sezione");
-        aggiungiSezioneButton.addActionListener(e -> selezionaInserisciNuovaSezione());
-
-        JButton eliminaSezioneButton = new JButton("Elimina sezione");
-        eliminaSezioneButton.addActionListener(e -> cliccaEliminaSezione());
-
-        JButton condividiPortfolioButton = new JButton("Condividi portfolio");
-        condividiPortfolioButton.addActionListener(e -> mostraCondivisioneCandidatura());
-
-        JButton gestioneLicenzeButton = new JButton("Gestione licenze");
-        gestioneLicenzeButton.addActionListener(e -> cliccaGestioneLicenze());
-
-        JButton gestioneVisibilitaSezioniButton = new JButton("Gestione visibilità sezioni");
-        gestioneVisibilitaSezioniButton.addActionListener(e -> cliccaGestioneVisibilitaSezioni());
-
-        JButton ordinamentoSezioniButton = new JButton("Ordinamento sezioni");
-        ordinamentoSezioniButton.addActionListener(e -> selezionaOrdinamentoSezioni());
-
-        panel.add(titolo);
-        panel.add(aggiungiSezioneButton);
-        panel.add(eliminaSezioneButton);
-        panel.add(condividiPortfolioButton);
-        panel.add(gestioneLicenzeButton);
-        panel.add(gestioneVisibilitaSezioniButton);
-        panel.add(ordinamentoSezioniButton);
-
-        setContentPane(panel);
-        revalidate();
-        repaint();
         setVisible(true);
+    }
+
+    // --- METODI DI AZIONE ---
+
+    public void cliccaModificaDescrizione() {
+        ModificaDescrizionePortController modificaDescrizionePortController =
+                new ModificaDescrizionePortController(this, dbmsBoundary);
+
+        modificaDescrizionePortController.richiediModificaDescrizione(portfolio_id);
     }
 
     public void selezionaInserisciNuovaSezione() {
         InserimentoSezioneController inserimentoSezioneController =
                 new InserimentoSezioneController(this, dbmsBoundary);
-
         inserimentoSezioneController.avviaInserimentoSezione(portfolio_id);
     }
 
     public void cliccaVisualizzaSezione(Long sezione_id) {
         VisualizzaSezioneController visualizzaSezioneController =
                 new VisualizzaSezioneController(this, dbmsBoundary, fileStorageBoundary);
-
         visualizzaSezioneController.richiediVisualizzazione(sezione_id);
     }
 
     public void cliccaEliminaSezione() {
         CancellaSezioneController cancellaSezioneController =
                 new CancellaSezioneController(this, dbmsBoundary, fileStorageBoundary);
-
         cancellaSezioneController.avviaCancellazioneSezione(portfolio_id);
     }
 
     public void mostraCondivisioneCandidatura() {
         CondivisioneCandidaturaBoundary condivisioneCandidaturaBoundary =
                 new CondivisioneCandidaturaBoundary(dbmsBoundary, portfolio_id);
-
         condivisioneCandidaturaBoundary.mostraPaginaCondivisione();
     }
 
     public void cliccaGestioneLicenze() {
-        // <<create>> GestioneLicenzaController
         GestioneLicenzaController gestioneLicenzaController =
                 new GestioneLicenzaController(this, dbmsBoundary);
-
-        // avviaGestioneLicenza(portfolio_id)
         gestioneLicenzaController.avviaGestioneLicenza(portfolio_id);
     }
 
     public void cliccaGestioneVisibilitaSezioni() {
-        // <<create>> GestioneVisibilitaPortController
         GestioneVisibilitaPortController gestioneVisibilitaPortController =
                 new GestioneVisibilitaPortController(this, dbmsBoundary);
-
         gestioneVisibilitaPortController.avviaGestioneVisibilitaSezioni(portfolio_id);
     }
 
     public void selezionaOrdinamentoSezioni() {
-        // <<create>> OrdinamentoSezioniController
         OrdinamentoSezioniController ordinamentoSezioniController =
                 new OrdinamentoSezioniController(this, dbmsBoundary);
-
-        // avviaOrdinamentoSezioni(idPortfolio)
         ordinamentoSezioniController.avviaOrdinamentoSezioni(portfolio_id);
     }
 
@@ -226,5 +260,40 @@ public class VisualizzaPortfolioBoundary extends JFrame {
 
     public void mostraPortfolioRimuoviSezione(Long sezione_id) {
         ricaricaPortfolio();
+    }
+
+    // --- TABLE MODEL PERSONALIZZATO ---
+
+    private static class SezioneTableModel extends AbstractTableModel {
+        private final String[] columnNames = {"Nome Sezione", "Descrizione", "Visibilità"};
+        private final List<SezioneEntity> data;
+
+        public SezioneTableModel(List<SezioneEntity> data) {
+            this.data = data != null ? data : new ArrayList<>();
+        }
+
+        @Override
+        public int getRowCount() { return data.size(); }
+
+        @Override
+        public int getColumnCount() { return columnNames.length; }
+
+        @Override
+        public String getColumnName(int column) { return columnNames[column]; }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+            SezioneEntity s = data.get(rowIndex);
+            switch (columnIndex) {
+                case 0: return s.getTitolo() != null ? s.getTitolo() : "";
+                case 1: return s.getCorpoTesto() != null ? s.getCorpoTesto() : "";
+                case 2: return Boolean.TRUE.equals(s.getIsPubblica()) ? "Pubblico" : "Privato";
+                default: return null;
+            }
+        }
+
+        public SezioneEntity getSezioneAt(int rowIndex) {
+            return data.get(rowIndex);
+        }
     }
 }
