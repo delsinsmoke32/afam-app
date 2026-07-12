@@ -61,7 +61,6 @@ public class PwdRecBoundary extends JFrame {
     public void cliccaOK() {
         // richiediReset(mail)
         richiediReset(mail);
-        dispose();
     }
 
     public void richiediReset(String mail) {
