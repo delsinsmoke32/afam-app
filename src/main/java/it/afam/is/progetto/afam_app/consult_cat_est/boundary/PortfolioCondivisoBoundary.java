@@ -162,7 +162,7 @@ public class PortfolioCondivisoBoundary extends JFrame {
 
         // --- BOTTOM PANEL ---
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JLabel statusLabel = new JLabel("🔒 Modalità Condivisa (Sola Lettura)");
+        JLabel statusLabel = new JLabel("Modalità Condivisa");
         statusLabel.setForeground(new Color(153, 0, 0));
         bottomPanel.add(statusLabel);
         add(bottomPanel, BorderLayout.SOUTH);

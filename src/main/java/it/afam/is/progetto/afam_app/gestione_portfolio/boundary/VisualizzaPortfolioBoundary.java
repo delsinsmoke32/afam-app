@@ -1,9 +1,6 @@
 package it.afam.is.progetto.afam_app.gestione_portfolio.boundary;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Font;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -110,30 +107,44 @@ public class VisualizzaPortfolioBoundary extends JFrame {
         scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 15));
         add(scrollPane, BorderLayout.CENTER);
 
-        // --- PANNELLO INFERIORE (Barra dei bottoni) ---
-        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 15));
-        bottomPanel.setBackground(new Color(230, 230, 230));
+        // --- PANNELLO INFERIORE (Barra dei bottoni in 2 righe) ---
+        // Usiamo un contenitore principale con GridLayout a 2 righe
+        JPanel bottomContainer = new JPanel(new GridLayout(2, 1));
 
+        JPanel rigaSuperiore = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        rigaSuperiore.setBackground(new Color(230, 230, 230));
+
+        JPanel rigaInferiore = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        rigaInferiore.setBackground(new Color(230, 230, 230));
+
+        // Creazione Bottoni
         btnVisualizzaSezione = new JButton("Visualizza Sezione");
         btnVisualizzaSezione.setEnabled(false); // Disabilitato se non c'è una riga selezionata
-
         JButton btnAggiungiSezione = new JButton("Aggiungi Sezione");
         JButton btnRimuoviSezione = new JButton("Rimuovi Sezione");
+
         JButton btnGestisciVisibilita = new JButton("Gestisci Visibilità");
         JButton btnGestisciLicenza = new JButton("Gestisci Licenza");
         JButton btnOrdinaSezioni = new JButton("Ordina Sezioni");
         JButton btnCondividi = new JButton("Condividi Portfolio");
 
-        // Aggiunta componenti al pannello inferiore
-        bottomPanel.add(btnVisualizzaSezione);
-        bottomPanel.add(btnAggiungiSezione);
-        bottomPanel.add(btnRimuoviSezione);
-        bottomPanel.add(btnGestisciVisibilita);
-        bottomPanel.add(btnGestisciLicenza);
-        bottomPanel.add(btnOrdinaSezioni);
-        bottomPanel.add(btnCondividi);
+        // Aggiungiamo le azioni sulle Sezioni alla prima riga
+        rigaSuperiore.add(btnVisualizzaSezione);
+        rigaSuperiore.add(btnAggiungiSezione);
+        rigaSuperiore.add(btnRimuoviSezione);
+        rigaSuperiore.add(btnOrdinaSezioni);
 
-        add(bottomPanel, BorderLayout.SOUTH);
+        // Aggiungiamo le impostazioni/condivisione del Portfolio alla seconda riga
+        rigaInferiore.add(btnGestisciVisibilita);
+        rigaInferiore.add(btnGestisciLicenza);
+        rigaInferiore.add(btnCondividi);
+
+        // Aggiungiamo le due righe al contenitore inferiore
+        bottomContainer.add(rigaSuperiore);
+        bottomContainer.add(rigaInferiore);
+
+        // Sostituiamo il bottomPanel originale con il nostro nuovo contenitore
+        add(bottomContainer, BorderLayout.SOUTH);
 
         // --- GESTIONE EVENTI ---
 
